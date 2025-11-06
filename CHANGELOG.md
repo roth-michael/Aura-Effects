@@ -1,5 +1,8 @@
 # Aura Effects Changelog
 
+## Version 1.3.2
+- Fixed a bug where auras would sometimes apply to self, despite being told not to
+
 ## Version 1.3.1
 - Fixed a bug with actorless tokens, hopefully for the last time
 

@@ -241,7 +241,7 @@ async function removeAndReplaceAuras(effects, scene) {
         const effect = getSourceEffect(sourceToken, effectName);
         if (!effect) continue;
         const distance = getTokenToTokenDistance(sourceToken, targetToken, { collisionTypes: effect.system.collisionTypes });
-        if ((effect.system.distance < distance) || !executeScript(sourceToken, targetToken, effect)) continue;
+        if ((effect.system.distance < distance) || !executeScript(sourceToken, targetToken, effect) || (!effect.system.applyToSelf && (sourceToken === targetToken))) continue;
         newBestApplyMap[targetToken.actor.uuid] ??= [];
         newBestApplyMap[targetToken.actor.uuid].push(effect.uuid);
         break;
