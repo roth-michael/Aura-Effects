@@ -54,7 +54,7 @@ async function addRemoveEffect(effect, options, userId) {
     for (const actorUuid of toAddTo) {
       actorToEffectsMap[actorUuid] = (actorToEffectsMap[actorUuid] ?? []).concat(sourceEffect.uuid);
     }
-    const shouldNotHave = nearby.filter(t => !toAddTo.includes(t));
+    const shouldNotHave = nearby.filter(t => !shouldHave.includes(t));
     for (const currToken of shouldNotHave) {
       const badEffect = currToken.actor.effects.find(e => e.origin === sourceEffect.uuid);
       if (badEffect) toDelete.push(badEffect);

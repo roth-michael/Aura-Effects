@@ -1,5 +1,8 @@
 # Aura Effects Changelog
 
+## Version 1.3.3
+- Fixed a bug where auras would sometimes un-apply and re-apply instead of just staying on
+
 ## Version 1.3.2
 - Fixed a bug where auras would sometimes apply to self, despite being told not to
 
