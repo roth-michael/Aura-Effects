@@ -97,7 +97,7 @@ function updateAurasForToken(token, onlyNew = false) {
     tokenAuras.get(token).set(effect.id, new AuraPointEffectSource({ object: token, effect }));
   }
   const tokenOwner = game.users.getDesignatedUser(u => u.character === token.actor) ?? game.users.activeGM;
-  for (const [id, aura] of tokenAuras.get(token).entries()) {
+  for (const [id, aura] of (tokenAuras.get(token)?.entries() ?? [])) {
     const data = sourceEffects.find(e => e.id === id)?.system;
     if (!data) {
       removeAura(token, aura);

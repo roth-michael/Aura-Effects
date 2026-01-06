@@ -3,6 +3,7 @@
 ## Version 1.3.4
 - Fixed a bug where the aura conversion button wouldn't inject if the system removed the statuses dropdown from the details tab
 - Fixed a bug where a click on the label of the aura conversion button would convert to aura, instead of just a click on the button
+- Fixed a bug where sometimes an error was thrown during aura visualization
 
 ## Version 1.3.3
 - Fixed a bug where auras would sometimes un-apply and re-apply instead of just staying on
