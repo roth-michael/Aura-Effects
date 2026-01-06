@@ -363,8 +363,8 @@ function injectAuraButton(app, html) {
     </div>
   `;
   const element = template.content.children[0];
-  html.querySelector("[data-tab=details] > .form-group.statuses")?.before(element);
-  element.addEventListener("click", () => {
+  html.querySelector(".tab[data-tab=details]")?.insertAdjacentElement("beforeend", element);
+  element.querySelector("button")?.addEventListener("click", () => {
     const currType = app.document.type;
     const updates = app._processFormData(null, app.form, new foundry.applications.ux.FormDataExtended(app.form));
     // Ensure changes are properly serialized into an array
