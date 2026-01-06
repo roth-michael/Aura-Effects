@@ -4,8 +4,8 @@
             "Aura": {
                 "FIELDS": {
                     "applyToSelf": {
-                        "hint": "Po zaškrtnutí se tato aura bude vztahovat i na zdrojový token.",
-                        "label": "Má působit i na sebe?"
+                        "hint": "Po zaškrtnutí tato aura bude působit i na zdrojový token.",
+                        "label": "Působit na sebe?"
                     },
                     "bestFormula": {
                         "hint": "Vzorec vyhodnocovaný pomocí dat hodu zdrojového aktéra pro určení nejsilnějšího efektu v případě nemožnosti sčítání. Pokud zůstane prázdné, rozhoduje pořadí.",
@@ -13,7 +13,7 @@
                     },
                     "canStack": {
                         "hint": "Po zaškrtnutí se na příslušné tokeny mohou současně uplatnit i další aury se stejným názvem.",
-                        "label": "Aura se může sčítat"
+                        "label": "Mohou se aury sčítat?"
                     },
                     "collisionTypes": {
                         "hint": "Jaké typy zdí, pokud vůbec nějaké, tuto auru zastaví.",
@@ -24,11 +24,11 @@
                         "label": "Barva"
                     },
                     "combatOnly": {
-                        "hint": "Po zaškrtnutí bude tento efekt mimo boj potlačen.",
+                        "hint": "Po zaškrtnutí bude tento efekt mimo boj potlačován.",
                         "label": "Pouze v boji?"
                     },
                     "disableOnHidden": {
-                        "hint": "Po zaškrtnutí bude tento efekt bude potlačen, pokud je token skrytý.",
+                        "hint": "Po zaškrtnutí bude, pokud je token skrytý, tento efekt potlačován.",
                         "label": "Potlačit při skrytí tokenu?"
                     },
                     "disposition": {
@@ -61,7 +61,7 @@
                         "label": "Podmíněný skript"
                     },
                     "showRadius": {
-                        "hint": "Zda se má zobrazit okraj aury všem uživatelům.",
+                        "hint": "Po zaškrtnutí se okraj aury zobrazí u všech uživatelů.",
                         "label": "Zobrazit poloměr?"
                     }
                 }
