@@ -1,11 +1,12 @@
 import AuraActiveEffectData from "./AuraActiveEffectData.mjs";
 import AuraActiveEffectSheetMixin from "./AuraActiveEffectSheet.mjs";
-import { executeScript, getAllAuraEffects, getChangingSceneAuras, getNearbyTokens, getTokenToTokenDistance, isFinalMovementComplete, removeAndReplaceAuras } from "./helpers.mjs";
+import { executeScript, getAllAuraEffects, getChangingSceneAuras, getNearbyTokens, isFinalMovementComplete, removeAndReplaceAuras } from "./helpers.mjs";
 import { applyAuraEffects, deleteEffects } from "./queries.mjs";
 import { registerSettings } from "./settings.mjs";
 import { canvasInit, destroyToken, drawGridLayer, drawToken, refreshToken, updateAllVisualizations, updateTokenVisualization } from "./auraVisualization.mjs";
 import { migrate } from "./migrations.mjs";
 import { api } from "./api.mjs";
+import { registerDnd5eHooks } from "./systems/dnd5e.mjs";
 
 /** @import { ActiveEffect, TokenDocument, User } from "@client/documents/_module.mjs"; */
 /** @import { TokenMovementOperation } from "@client/documents/_types.mjs" */
@@ -217,12 +218,15 @@ async function moveToken(token, movement, operation, user) {
   const [activeSourceEffects, inactiveSourceEffects] = getAllAuraEffects(token.actor);
   const inactiveUuids = inactiveSourceEffects.map(e => e.uuid);
 
-  // Get start-of-movement in-range tokens for each aura source effect
+  // Get start-of-movement in-range tokens for each aura source effect.
+  // Unless actor ID has modified, in which case we won't be deleting, only potentially adding
   const preMoveRanges = {};
-  for (const effect of activeSourceEffects) {
-    const { distance: radius, disposition, collisionTypes } = effect.system;
-    if (!radius) continue;
-    preMoveRanges[effect.uuid] = new Set(getNearbyTokens(token, radius, { origin: movement.origin, disposition, collisionTypes }).map(t => t.actor));
+  if (!("previousActorId" in operation)) {
+    for (const effect of activeSourceEffects) {
+      const { distance: radius, disposition, collisionTypes } = effect.system;
+      if (!radius) continue;
+      preMoveRanges[effect.uuid] = new Set(getNearbyTokens(token, radius, { origin: movement.origin, disposition, collisionTypes }).map(t => t.actor));
+    }
   }
   await token.object.movementAnimationPromise;
 
@@ -232,7 +236,7 @@ async function moveToken(token, movement, operation, user) {
   for (const effect of activeSourceEffects) {
     const { distance: radius, disposition, collisionTypes } = effect.system;
     if (!radius) continue;
-    const preMoveRange = preMoveRanges[effect.uuid];
+    const preMoveRange = preMoveRanges[effect.uuid] ?? new Set();
     const postMoveRange = new Set(
       getNearbyTokens(token, radius, { disposition, collisionTypes })
       .filter(t => executeScript(token, t, effect))
@@ -246,17 +250,17 @@ async function moveToken(token, movement, operation, user) {
     await removeAndReplaceAuras(toDelete.concat(additionalDeletion).filter(e => e), token.parent);
 
     if (isFinalMovementComplete(token)) {
-      const toAddTo = Array.from(postMoveRange.filter(a => (a !== token.actor) && !a?.effects.find(e => e.origin === effect.uuid))).map(a => a?.uuid);
+      const toAddTo = Array.from(postMoveRange.difference(preMoveRange).filter(a => (a !== token.actor) && !a?.effects.find(e => e.origin === effect.uuid))).map(a => a?.uuid);
       for (const actorUuid of toAddTo) {
         actorToEffectsMap[actorUuid] = (actorToEffectsMap[actorUuid] ?? []).concat(effect.uuid);
       }
     }
   }
-  if (isFinalMovementComplete(token)) {
-    if (!foundry.utils.isEmpty(actorToEffectsMap)) await activeGM.query("auraeffects.applyAuraEffects", actorToEffectsMap);
+  if (isFinalMovementComplete(token) && !foundry.utils.isEmpty(actorToEffectsMap)) {
+    await activeGM.query("auraeffects.applyAuraEffects", actorToEffectsMap);
   }
 
-  const [sceneAurasToRemove, sceneAurasToAdd] = getChangingSceneAuras(token);
+  const [sceneAurasToRemove, sceneAurasToAdd] = getChangingSceneAuras(token, movement.origin);
 
   // Remove effects actor shouldn't have, add effects actor should have (if final segment of token's movement)
   if (sceneAurasToRemove.length) await removeAndReplaceAuras(sceneAurasToRemove, token.parent);
@@ -399,6 +403,13 @@ function registerHooks() {
   Hooks.on("destroyToken", destroyToken);
   Hooks.on("refreshToken", refreshToken);
   Hooks.on("initializeLightSources", updateAllVisualizations);
+
+  // System-specific hooks
+  switch (game.system.id) {
+    case "dnd5e": 
+      registerDnd5eHooks();
+      break;
+  }
 }
 
 function registerQueries() {

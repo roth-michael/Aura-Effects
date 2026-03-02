@@ -23,6 +23,14 @@ export function registerSettings() {
       if (canvas?.ready) updateAllVisualizations();
     }
   });
+  game.settings.register("auraeffects", "preferLatest", {
+    name: "AURAEFFECTS.SETTINGS.PreferLatest.Name",
+    hint: "AURAEFFECTS.SETTINGS.PreferLatest.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
   game.settings.register("auraeffects", "disableScrollingText", {
     name: "AURAEFFECTS.SETTINGS.DisableScrollingText.Name",
     hint: "AURAEFFECTS.SETTINGS.DisableScrollingText.Hint",

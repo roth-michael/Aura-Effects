@@ -45,7 +45,9 @@ async function applyAuraEffects(actorToEffectsMap) {
           foundry.utils.setProperty(effectData, "flags.auraeffects.bestValue", bestValue);
           const existingEffect = allEffects.find(e => e.flags?.auraeffects?.fromAura && e.name === effectData.name);
           if (existingEffect) {
-            if ((existingEffect.flags.auraeffects.bestValue ?? 0) >= bestValue) return null;
+            const currBest = existingEffect.flags.auraeffects.bestValue ?? 0;
+            if (!game.settings.get("auraeffects", "preferLatest") && (currBest >= bestValue)) return null;
+            else if (currBest > bestValue) return null; 
             effectsToDelete.push(existingEffect.id);
           }
           const existingSourceEffect = allEffects.find(e => 

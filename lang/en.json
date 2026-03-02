@@ -98,6 +98,10 @@
             "ExactCircles": {
                 "Hint": "When enabled, visualized auras will be shown as perfect circles when \"Grid Diagonals\" is set to \"Exact.\" (This can result in inaccurate visualizations around the edges of circles, especially with larger aura radii).",
                 "Name": "Show Circles with Exact Diagonals"
+            },
+            "PreferLatest": {
+                "Hint": "When enabled, the most recent instance of a non-stackable Aura will be preferred, if there is no \"best\" aura. By default, ties in \"best\" go to the existing effect.",
+                "Name": "Prefer Most Recent Aura"
             }
         },
         "SHEETS.AuraActiveEffectSheet": "Aura Active Effect Sheet"

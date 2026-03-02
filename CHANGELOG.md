@@ -1,5 +1,9 @@
 # Aura Effects Changelog
 
+## Version 1.4.0
+- Added a setting so that, in instances of a tie between non-stacking auras, the "new" aura wins (by default, the existing effect wins)
+- Fixed a dnd5e-specific bug where auras didn't play nicely when transforming
+
 ## Version 1.3.4
 - Fixed a bug where the aura conversion button wouldn't inject if the system removed the statuses dropdown from the details tab
 - Fixed a bug where a click on the label of the aura conversion button would convert to aura, instead of just a click on the button

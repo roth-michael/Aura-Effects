@@ -27,22 +27,23 @@ function getDistance(scene, a, b, { collisionTypes }) {
  * @param {TokenDocument} tokenA                First Token
  * @param {TokenDocument} tokenB                Second Token
  * @param {Object} options                      Additional options
- * @param {TokenPosition} options.origin        The origin of the source token's movement, if different from its actual position
+ * @param {TokenPosition} options.originA       The origin of token A's movement, if different from its actual position
+ * @param {TokenPosition} options.originB       The origin of token B's movement, if different from its actual position
  * @param {string[]} options.collisionTypes     Which collision types should result in Infinity distance
  * @returns {number}                            The minimum distance
  */
-function getTokenToTokenDistance(tokenA, tokenB, { origin = {}, collisionTypes = [] }) {
+function getTokenToTokenDistance(tokenA, tokenB, { originA = {}, originB = {}, collisionTypes = [] }) {
   const scene = tokenA.parent;
   // TODO: Similar lenience with gridless as gridded?
   const tokenAOffsets = scene.grid.isGridless
-    ? [tokenA.getCenterPoint(origin)]
-    : tokenA.getOccupiedGridSpaceOffsets(origin);
+    ? [tokenA.getCenterPoint(originA)]
+    : tokenA.getOccupiedGridSpaceOffsets(originA);
   const tokenBOffsets = scene.grid.isGridless
-    ? [tokenB.getCenterPoint()]
-    : tokenB.getOccupiedGridSpaceOffsets();
+    ? [tokenB.getCenterPoint(originB)]
+    : tokenB.getOccupiedGridSpaceOffsets(originB);
   // TODO: Perhaps proper elevation ranges
-  const tokenAElevation = origin.elevation ?? tokenA.elevation ?? 0;
-  const tokenBElevation = tokenB.elevation ?? 0;
+  const tokenAElevation = originA.elevation ?? tokenA.elevation ?? 0;
+  const tokenBElevation = originB.elevation ?? tokenB.elevation ?? 0;
   // TODO: Maybe filter down comparisons instead of full 2D array
   const distances = [];
   for (const offsetA of tokenAOffsets) {
@@ -101,13 +102,13 @@ function executeScript(sourceToken, token, effect) {
  * Get all tokens within a certain range of the source token
  * @param {TokenDocument} source                        The source token from which to measure
  * @param {number} radius                               The radius of the grid-based circle to measure
- * @param {Object} options                              Additional options
- * @param {TokenPosition|undefined} options.origin      The origin of the source token's movement, if different from its actual position
- * @param {-1|0|1} options.disposition                  The relative disposition of token that should be considered (-1 for hostile, 0 for all, 1 for friendly)
- * @param {string[]|undefined} options.collisionTypes   Which collision types should result in Infinity distance
+ * @param {Object} [options]                            Additional options
+ * @param {TokenPosition} [options.origin]              The origin of the source token's movement, if different from its actual position
+ * @param {-1|0|1} [options.disposition]                The relative disposition of token that should be considered (-1 for hostile, 0 for all, 1 for friendly)
+ * @param {string[]} [options.collisionTypes]           Which collision types should result in Infinity distance
  * @returns {TokenDocument[]}                           The TokenDocuments within range
  */
-function getNearbyTokens(source, radius, { origin, disposition = 0, collisionTypes }) {
+function getNearbyTokens(source, radius, { origin={}, disposition = 0, collisionTypes }={}) {
   const putativeTokens = Array.from(getGenerallyWithin(source, radius))
     .map(t => t.document)
     .filter(t => {
@@ -116,7 +117,7 @@ function getNearbyTokens(source, radius, { origin, disposition = 0, collisionTyp
       if (disposition > 0) return (source.disposition === t.disposition);
       return true;
     });
-  return putativeTokens.filter(token => getTokenToTokenDistance(source, token, { origin, collisionTypes }) <= radius);
+  return putativeTokens.filter(token => getTokenToTokenDistance(source, token, { originA: origin, collisionTypes }) <= radius);
 }
 
 /**
@@ -153,9 +154,10 @@ function getAllAuraEffects(actor) {
 /**
  * Determine a list of auras on-scene which should be removed from, and which should be added to, a token
  * @param {TokenDocument} token                 The token which should be having auras added/removed from it
+ * @param {TokenPosition} [origin]              The movement origin, if relevant (to filter out auras that were already stood in)
  * @returns {[ActiveEffect[], ActiveEffect[]]}  The Arrays of aura effects (to remove, then to add)
  */
-function getChangingSceneAuras(token) {
+function getChangingSceneAuras(token, origin={}) {
   const currentAppliedAuras = token.actor.appliedEffects.filter(i => i.flags?.auraeffects?.fromAura);
   // Get all aura source effects on the scene, split into "actor shouldn't have" and "actor should have"
   const [sceneAurasToRemove, sceneAurasToAdd] = token.parent.tokens.reduce(([toRemove, toAdd], sourceToken) => {
@@ -176,7 +178,10 @@ function getChangingSceneAuras(token) {
       const currentlyApplied = currentAppliedAuras.find(e => e.origin === currEffect.uuid);
       if ((currEffect.system.distance < distance) || !executeScript(sourceToken, token, currEffect)) {
         if (currentlyApplied) toRemove.push(currentlyApplied);
-      } else toAdd.push(currEffect);
+      } else {
+        const prevDistance = getTokenToTokenDistance(sourceToken, token, { originB: origin, collisionTypes: currEffect.system.collisionTypes });
+        if (currEffect.system.distance < prevDistance) toAdd.push(currEffect);
+      }
     }
 
     // TODO: Can I do this clever thing and still handle the proper collision checks? 
