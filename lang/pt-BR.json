@@ -98,6 +98,10 @@
             "ExactCircles": {
                 "Hint": "Quando ativado, as auras visualizadas serão mostradas como círculos perfeitos quando a opção \"Diagonais da Grade\" estiver definida como \"Exata\". (Isso pode resultar em visualizações imprecisas ao redor das bordas dos círculos, especialmente com raios de aura maiores).",
                 "Name": "Mostrar Círculos com Diagonais Exatas"
+            },
+            "PreferLatest": {
+                "Hint": "Quando ativada, a instância mais recente de uma Aura não-acumulável será preferida, caso não exista uma Aura \"melhor\". Por padrão, em caso de empate, a Aura \"melhor\" vai para o efeito existente.",
+                "Name": "Preferir Aura Mais Recente"
             }
         },
         "SHEETS.AuraActiveEffectSheet": "Ficha de Aura Effect"
