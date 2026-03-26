@@ -82,6 +82,7 @@
             "Beginning": "Avvio delle migrazioni di Aura Effects..."
         },
         "NoActiveGM": "Aura Effects non funzionerà senza un GM attivo.",
+        "PotentialSystemIncompatibility": "Si prega di notare che, poiché la definizione base dell'Effetto Attivo di questo sistema si sovrappone ai campi aggiunti dagli Effetti Aura, gli effetti di tipo Aura non avranno i miglioramenti specifici del sistema presenti sugli effetti normali.",
         "SETTINGS": {
             "DefaultVisibility": {
                 "Hint": "Se abilitato, le nuove aure saranno visibili per impostazione predefinita.",
@@ -98,6 +99,10 @@
             "ExactCircles": {
                 "Hint": "Se abilitato, le aure saranno mostrate come cerchi perfetti quando \"Diagonali a Griglia\" è impostato su \"Esatte\" (può causare errori visivi ai bordi per aure grandi).",
                 "Name": "Mostra Cerchi con Diagonali Esatte"
+            },
+            "PreferLatest": {
+                "Hint": "Quando abilitata, se non esiste un'aura \"migliore\", verrà preferita l'istanza più recente di un'Aura non cumulabile. Di default, in caso di parità nella categoria \"migliore\", viene scelto l'effetto esistente.",
+                "Name": "Preferisci Aura più recente"
             }
         },
         "SHEETS.AuraActiveEffectSheet": "Scheda Effetto Attivo Aura"
