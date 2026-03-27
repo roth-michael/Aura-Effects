@@ -82,6 +82,7 @@
             "Beginning": "Iniciando migrações de Aura Effects..."
         },
         "NoActiveGM": "Aura Effects não funcionará sem um Mestre conectado.",
+        "PotentialSystemIncompatibility": "Note que, como a definição básica de Efeito Ativo deste sistema se sobrepõe aos campos adicionados pelo Aura Effects, quaisquer efeitos do tipo Aura não terão os aprimoramentos específicos do sistema que existem nos efeitos normais.",
         "SETTINGS": {
             "DefaultVisibility": {
                 "Hint": "Quando habilitado, a visualização será ativada por padrão para quaisquer efeitos de aura recém-criados.",
