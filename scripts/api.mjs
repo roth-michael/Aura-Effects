@@ -122,7 +122,7 @@ function getMigratedEffectData(oldEffect, oldSettings) {
       }
     }
     diffEffectData.type = "auraeffects.aura";
-    diffEffectData["==system"] = {
+    diffEffectData.system = _replace({
       applyToSelf: !ignoreSelf,
       collisionTypes: wallsBlock === "system"
         ? oldSettings.wallsBlock
@@ -139,10 +139,10 @@ function getMigratedEffectData(oldEffect, oldSettings) {
       evaluatePreApply: true,
       overrideName: nameOverride,
       script: newCustomCheck,
-    };
-    diffEffectData["flags.-=ActiveAuras"] = null;
+    });
+    diffEffectData["flags.ActiveAuras"] = _del;
   } else if (applied) {
-    diffEffectData["flags.==ActiveAuras"] = { fromAura: true };
+    diffEffectData["flags.ActiveAuras"] = _replace({ fromAura: true });
   }
   return diffEffectData;
 }

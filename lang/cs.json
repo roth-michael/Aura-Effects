@@ -91,10 +91,6 @@
                 "Hint": "Zakáže posouvající se text zobrazovaný při přidání/odebrání efektu způsobeného aurou na aktéra tokenu.",
                 "Name": "Zakázat posouvající se text?"
             },
-            "DisableVisuals": {
-                "Hint": "Úplně zakáže vizualizaci poloměru aury, bez ohledu na nastavení efektu.",
-                "Name": "Zakázat vizualizaci?"
-            },
             "ExactCircles": {
                 "Hint": "Pokud je nastavení \"Grid Diagonals\" nastaveno na \"Exact.\", budou po zaškrtnutí vizualizované aury zobrazovány jako dokonalé kruhy. (Může vést k nepřesné vizualizaci na okrajích kruhů, zejména u větších aur.)",
                 "Name": "Zobrazovat přesné úhlopříčky?"

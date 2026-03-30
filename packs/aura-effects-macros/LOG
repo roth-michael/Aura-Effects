@@ -1,5 +1,8 @@
-2025/05/20-09:51:00.944 5a78 Delete type=3 #1
-2025/05/20-09:56:35.200 77ac Level-0 table #5: started
-2025/05/20-09:56:35.203 77ac Level-0 table #5: 678 bytes OK
-2025/05/20-09:56:35.204 77ac Delete type=0 #3
-2025/05/20-09:56:35.208 77ac Manual compaction at level-0 from '!macros!NeaP6NSy6TzLQuKS' @ 72057594037927935 : 1 .. '!macros!NeaP6NSy6TzLQuKS' @ 0 : 0; will stop at (end)
+2026/03/30-12:15:08.841 3bb8 Recovering log #4
+2026/03/30-12:15:08.846 3bb8 Delete type=0 #4
+2026/03/30-12:15:08.846 3bb8 Delete type=3 #2
+2026/03/30-15:40:08.096 8b44 Level-0 table #9: started
+2026/03/30-15:40:08.096 8b44 Level-0 table #9: 0 bytes OK
+2026/03/30-15:40:08.098 8b44 Delete type=0 #7
+2026/03/30-15:40:08.102 8b44 Manual compaction at level-0 from '!macros!NeaP6NSy6TzLQuKS' @ 72057594037927935 : 1 .. '!macros!NeaP6NSy6TzLQuKS' @ 0 : 0; will stop at (end)
+2026/03/30-15:40:08.102 8b44 Manual compaction at level-1 from '!macros!NeaP6NSy6TzLQuKS' @ 72057594037927935 : 1 .. '!macros!NeaP6NSy6TzLQuKS' @ 0 : 0; will stop at (end)

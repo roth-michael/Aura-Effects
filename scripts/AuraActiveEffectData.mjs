@@ -17,6 +17,7 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
         applyToSelf: new BooleanField({ initial: true }),
         bestFormula: new StringField({ initial: "" }),
         canStack: new BooleanField({ initial: false }),
+        // TODO: CHANGE THIS
         collisionTypes: new SetField(new StringField({
           choices: {
             light: "WALL.FIELDS.light.label",
@@ -81,9 +82,9 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
       let actor = this.parent.parent;
       if (actor instanceof Item) actor = actor.actor;
       if (!this.applyToSelf) {
-        this.stashedChanges = this.parent.changes;
+        this.stashedChanges = this.changes;
         this.stashedStatuses = this.parent.statuses;
-        this.parent.changes = [];
+        this.changes = [];
         this.parent.statuses = new Set();
       } else {
         const token = actor?.getActiveTokens(false, true)[0];
@@ -91,12 +92,12 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           // Don't try to execute the script for synthetic actors that haven't yet had their delta prepared, lest we enter a loop
           const deltaPrepped = !actor.isToken || Object.getOwnPropertyDescriptor(token, "delta")?.value;
           if (deltaPrepped && !executeScript(token, token, this.parent)) {
-            this.stashedChanges = this.parent.changes;
+            this.stashedChanges = this.changes;
             this.stashedStatuses = this.parent.statuses;
-            this.parent.changes = [];
+            this.changes = [];
             this.parent.statuses = new Set();
           } else {
-            if (this.stashedChanges?.length) this.parent.changes = this.stashedChanges;
+            if (this.stashedChanges?.length) this.changes = this.stashedChanges;
             if (this.stashedStatuses?.size) this.parent.statuses = this.stashedStatuses;
           }
         }
@@ -105,9 +106,9 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
         const nameMatch = this.overrideName || this.parent.name;
         const existing = actor?.effects.find(e => e.flags?.auraeffects?.fromAura && e.name === nameMatch);
         if (existing) {
-          this.stashedChanges = this.parent.changes;
+          this.stashedChanges = this.changes;
           this.stashedStatuses = this.parent.statuses;
-          this.parent.changes = [];
+          this.changes = [];
           this.parent.statuses = new Set();
         }
       }

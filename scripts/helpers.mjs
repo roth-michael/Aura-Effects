@@ -1,76 +1,5 @@
 /** @import { ActiveEffect, Actor, Scene, TokenDocument } from "@client/documents/_module.mjs" */
-/** @import { Token } from "@client/canvas/placeables/_module.mjs" */
-/** @import { ElevatedPoint } from "@common/_types.mjs" */
-/** @import { TokenPosition } from "@common/documents/_types.mjs" */
-
-/**
- * Get 3D distance in grid units, returning Infinity if any provided collision types would block the ray
- * @param {Scene} scene                         The scene to measure on
- * @param {ElevatedPoint} a                     First Point
- * @param {ElevatedPoint} b                     Second Point
- * @param {Object} options                      Additional options
- * @param {string[]} options.collisionTypes     Which collision types should result in infinite distance
- * @returns {number}                            The distance
- */
-function getDistance(scene, a, b, { collisionTypes }) {
-  for (const collisionType of collisionTypes) {
-    if (CONFIG.Canvas.polygonBackends[collisionType]?.testCollision(a, b, {
-      type: collisionType,
-      mode: "any"
-    })) return Infinity;
-  }
-  return scene.grid.measurePath([a, b]).distance;
-}
-
-/**
- * Get minimum 3D distance from one token to another
- * @param {TokenDocument} tokenA                First Token
- * @param {TokenDocument} tokenB                Second Token
- * @param {Object} options                      Additional options
- * @param {TokenPosition} options.originA       The origin of token A's movement, if different from its actual position
- * @param {TokenPosition} options.originB       The origin of token B's movement, if different from its actual position
- * @param {string[]} options.collisionTypes     Which collision types should result in Infinity distance
- * @returns {number}                            The minimum distance
- */
-function getTokenToTokenDistance(tokenA, tokenB, { originA = {}, originB = {}, collisionTypes = [] }) {
-  const scene = tokenA.parent;
-  // TODO: Similar lenience with gridless as gridded?
-  const tokenAOffsets = scene.grid.isGridless
-    ? [tokenA.getCenterPoint(originA)]
-    : tokenA.getOccupiedGridSpaceOffsets(originA);
-  const tokenBOffsets = scene.grid.isGridless
-    ? [tokenB.getCenterPoint(originB)]
-    : tokenB.getOccupiedGridSpaceOffsets(originB);
-  // TODO: Perhaps proper elevation ranges
-  const tokenAElevation = originA.elevation ?? tokenA.elevation ?? 0;
-  const tokenBElevation = originB.elevation ?? tokenB.elevation ?? 0;
-  // TODO: Maybe filter down comparisons instead of full 2D array
-  const distances = [];
-  for (const offsetA of tokenAOffsets) {
-    for (const offsetB of tokenBOffsets) {
-      const pointA = { ...scene.grid.getCenterPoint(offsetA), elevation: tokenAElevation };
-      const pointB = { ...scene.grid.getCenterPoint(offsetB), elevation: tokenBElevation };
-      distances.push(getDistance(scene, pointA, pointB, { collisionTypes }));
-    }
-  }
-  const externalAdjust = (scene.grid.distance / scene.grid.size) * (scene.grid.isGridless
-    ? tokenA.object.externalRadius
-    : 0);
-  return Math.min(...distances) - externalAdjust;
-}
-
-/**
- * Get a putative set of Tokens which MAY be within the specified radius of the source token
- * @param {TokenDocument} sourceToken   The source token from which to measure
- * @param {number} radius               The radius of the grid-based circle to estimate
- * @returns {Set<Token>}                A set of Tokens which MAY be within range (necessarily containing the subset of Tokens which ARE within range)
- */
-function getGenerallyWithin(sourceToken, radius) {
-  const adjustedRadius = sourceToken.parent.grid.size * ((radius / sourceToken.parent.grid.distance) + sourceToken.width / 2);
-  const center = sourceToken.object.center;
-  const rect = new PIXI.Rectangle(center.x - adjustedRadius, center.y - adjustedRadius, 2 * adjustedRadius, 2 * adjustedRadius);
-  return sourceToken.layer.quadtree.getObjects(rect);
-}
+/** @import { RegionData } from "@common/documents/_types.mjs" */
 
 /**
  * Execute the script on an aura active effect for a given token, returning whether said token should receive
@@ -89,49 +18,13 @@ function executeScript(sourceToken, token, effect) {
   try {
     return toEvaluate.call(toEvaluate, actor, token.object, sourceToken.object, rollData);
   } catch (error) {
-    console.error(game.i18n.format("AURAEFFECTS.Errors.ScriptError", {
+    console.error(_loc("AURAEFFECTS.Errors.ScriptError", {
       actor: sourceToken.actor.name,
       effect: effect.name,
       error
     }));
     return true;
   }
-}
-
-/**
- * Get all tokens within a certain range of the source token
- * @param {TokenDocument} source                        The source token from which to measure
- * @param {number} radius                               The radius of the grid-based circle to measure
- * @param {Object} [options]                            Additional options
- * @param {TokenPosition} [options.origin]              The origin of the source token's movement, if different from its actual position
- * @param {-1|0|1} [options.disposition]                The relative disposition of token that should be considered (-1 for hostile, 0 for all, 1 for friendly)
- * @param {string[]} [options.collisionTypes]           Which collision types should result in Infinity distance
- * @returns {TokenDocument[]}                           The TokenDocuments within range
- */
-function getNearbyTokens(source, radius, { origin={}, disposition = 0, collisionTypes }={}) {
-  const putativeTokens = Array.from(getGenerallyWithin(source, radius))
-    .map(t => t.document)
-    .filter(t => {
-      if (!t.actor) return false;
-      if (disposition < 0) return (source.disposition * t.disposition) === -1;
-      if (disposition > 0) return (source.disposition === t.disposition);
-      return true;
-    });
-  return putativeTokens.filter(token => getTokenToTokenDistance(source, token, { originA: origin, collisionTypes }) <= radius);
-}
-
-/**
- * Determine whether a token has no further movement queued (or the game has been paused mid-movement)
- * @param {TokenDocument} token     The token to check
- * @returns {boolean}               true if final movement is complete, else false
- */
-function isFinalMovementComplete(token) {
-  return (token.movement.state === "stopped") || (
-    !token.movement.pending?.distance
-    && token.movement.destination.x === token.x
-    && token.movement.destination.y === token.y
-    && token.movement.destination.elevation === token.elevation
-  );
 }
 
 /**
@@ -152,52 +45,34 @@ function getAllAuraEffects(actor) {
 }
 
 /**
- * Determine a list of auras on-scene which should be removed from, and which should be added to, a token
- * @param {TokenDocument} token                 The token which should be having auras added/removed from it
- * @param {TokenPosition} [origin]              The movement origin, if relevant (to filter out auras that were already stood in)
- * @returns {[ActiveEffect[], ActiveEffect[]]}  The Arrays of aura effects (to remove, then to add)
+ * Get all aura-providing regions that a token is currently within
+ * @param {TokenDocument} token
+ * @returns {Set<RegionDocument>} 
  */
-function getChangingSceneAuras(token, origin={}) {
-  const currentAppliedAuras = token.actor.effects.filter(i => i.flags?.auraeffects?.fromAura);
-  // Get all aura source effects on the scene, split into "actor shouldn't have" and "actor should have"
-  const [sceneAurasToRemove, sceneAurasToAdd] = token.parent.tokens.reduce(([toRemove, toAdd], sourceToken) => {
-    if (sourceToken.actor === token.actor) return [toRemove, toAdd];
-    // -1 if enemies, 0 if at least one is neutral, 1 if allied
-    // TODO: account for secret? Should secret be treated as hostile, friendly, or neutral?
-    // Currently is -2, 0, or 2, so will only really work with "any"
-    const disposition = token.disposition * sourceToken.disposition;
-    const [activeAuraEffects, inactiveAuraEffects] = getAllAuraEffects(sourceToken.actor);
-    const currentlyAppliedToRemove = currentAppliedAuras.filter(appliedEffect => inactiveAuraEffects.some(inactiveEffect => appliedEffect.origin === inactiveEffect.uuid));
-    if (inactiveAuraEffects.length) toRemove.push(...currentlyAppliedToRemove);
-    const auraEffects = activeAuraEffects
-      .filter(e => [0, disposition].includes(e.system.disposition));
-    if (!auraEffects.length) return [toRemove, toAdd];
+function getAuraRegions(token) {
+  return token.regions.filter(r => (r.attachment.token !== token) && (r.getFlag("auraeffects", "origin")));
+}
 
-    for (const currEffect of auraEffects) {
-      const distance = getTokenToTokenDistance(sourceToken, token, { collisionTypes: currEffect.system.collisionTypes });
-      const currentlyApplied = currentAppliedAuras.find(e => e.origin === currEffect.uuid);
-      if ((currEffect.system.distance < distance) || !executeScript(sourceToken, token, currEffect)) {
-        if (currentlyApplied) toRemove.push(currentlyApplied);
-      } else {
-        const prevDistance = getTokenToTokenDistance(sourceToken, token, { originB: origin, collisionTypes: currEffect.system.collisionTypes });
-        if (currEffect.system.distance < prevDistance) toAdd.push(currEffect);
-      }
-    }
-
-    // TODO: Can I do this clever thing and still handle the proper collision checks? 
-    // Would prefer not to repeat distance checks unnecessarily
-    // const distance = getTokenToTokenDistance(token, sourceToken);
-    // toRemove.push(...auraEffects.filter(e => e.system.distance < distance));
-    // toAdd.push(...auraEffects.filter(e => e.system.distance >= distance));
-    return [toRemove, toAdd]
-  }, [[], []]);
-
-  for (const effect of token.actor.effects) {
-    if (!effect.flags?.auraeffects?.fromAura) continue;
-    const sourceEffect = fromUuidSync(effect.origin);
-    if (!sourceEffect || sourceEffect.disabled || sourceEffect.isSuppressed) sceneAurasToRemove.push(effect);
-  }
-  return [sceneAurasToRemove, sceneAurasToAdd]
+/**
+ * Returns whether the provided aura effect should apply to the provided token
+ * @param {ActiveEffect} effect 
+ * @param {TokenDocument} token 
+ */
+function auraShouldApply(effect, token) {
+  // Actorless or sceneless token
+  if (!token.actor || !token.parent) return false;
+  // Not in range
+  if (!getAuraRegions(token).find(r => r.getFlag("auraeffects", "origin") === effect.uuid)) return false;
+  // Somehow despite being in range, no source token
+  const sourceToken = token.parent.tokens.find(t => t.actor === effect.actor);
+  if (!sourceToken) return false;
+  // Disposition doesn't match
+  const disposition = token.disposition * sourceToken.disposition;
+  if (![0, disposition].includes(effect.system.disposition)) return false;
+  // Script doesn't pass
+  if (!executeScript(sourceToken, token, effect)) return false;
+  // All good
+  return true;
 }
 
 /**
@@ -245,8 +120,8 @@ async function removeAndReplaceAuras(effects, scene) {
       for (const sourceToken of allEmitting) {
         const effect = getSourceEffect(sourceToken, effectName);
         if (!effect) continue;
-        const distance = getTokenToTokenDistance(sourceToken, targetToken, { collisionTypes: effect.system.collisionTypes });
-        if ((effect.system.distance < distance) || !executeScript(sourceToken, targetToken, effect) || (!effect.system.applyToSelf && (sourceToken === targetToken))) continue;
+        if (!getAuraRegions(targetToken).find(r => r.getFlag("auraeffects", "origin") === effect.uuid)) continue;
+        if (!executeScript(sourceToken, targetToken, effect) || (!effect.system.applyToSelf && (sourceToken === targetToken))) continue;
         newBestApplyMap[targetToken.actor.uuid] ??= [];
         newBestApplyMap[targetToken.actor.uuid].push(effect.uuid);
         break;
@@ -283,14 +158,119 @@ function getExtendedTabs(origTabs) {
   };
 }
 
+/**
+ * Create or delete all token-attached regions as necessary
+ * @param {TokenDocument} token         A specified token document
+ */
+async function updateAllAuraRegions(token) {
+  if (!token.actor) return;
+  const [activeSourceEffects] = getAllAuraEffects(token.actor);
+  const attachedAuraRegions = Array.from(token.attachments.regions.filter(r => r.getFlag("auraeffects", "origin")));
+  const shouldHaveUuids = new Set(activeSourceEffects.map(e => e.uuid));
+  const toDelete = attachedAuraRegions.filter(r => !shouldHaveUuids.has(r.flags.auraeffects.origin)).map(r => r.id);
+  const toCreate = [];
+  const toUpdate = [];
+  for (const effect of activeSourceEffects) {
+    const existingRegion = attachedAuraRegions.find(r => r.getFlag("auraeffects", "origin") === effect.uuid);
+    if (!existingRegion) toCreate.push(getRegionDataFromEffect(effect, token));
+    else {
+      const updateData = {_id: existingRegion.id, ...getRegionDataFromEffect(effect, token)};
+      toUpdate.push(updateData);
+    }
+  }
+  await game.users.activeGM.query("auraeffects.updateRegionsForToken", { tokenUuid: token.uuid, toCreate, toUpdate, toDelete });
+  const updatedIds = new Set(toUpdate.map(r => r._id));
+  const toRemove = [];
+  const toAdd = {};
+  for (const region of attachedAuraRegions) {
+    if (!updatedIds.has(region.id)) continue;
+    const sourceEffect = fromUuidSync(region.getFlag("auraeffects", "origin"));
+    for (const currToken of region.tokens) {
+      if (!currToken.actor) continue;
+      const currAppliedEffect = currToken.actor.effects.find(e => e.origin === sourceEffect.uuid);
+      if (currAppliedEffect) {
+        if (!auraShouldApply(sourceEffect, currToken)) toRemove.push(currAppliedEffect);
+      } else {
+        if (auraShouldApply(sourceEffect, currToken)) toAdd[currToken.actor.uuid] = [sourceEffect.uuid]
+      }
+    }
+  }
+  if (toRemove.length) await removeAndReplaceAuras(toRemove, token.parent);
+  if (!foundry.utils.isEmpty(toAdd)) await game.users.activeGM.query("auraeffects.applyAuraEffects", toAdd);
+}
+
+/**
+ * Ensure all applied auras shouldn't be removed, and all non-applied auras shouldn't be applied
+ * @param {TokenDocument} token 
+ */
+// TODO: Any way to keep this from always toggling between effects if prefer recent is on & both require conditionals?
+async function refreshConditionalAuras(token) {
+  if (!token.actor) return;
+  const toRemove = [];
+  const toAdd = [];
+  for (const region of getAuraRegions(token)) {
+    const sourceEffect = fromUuidSync(region.getFlag("auraeffects", "origin"));
+    if (!sourceEffect?.system.script.length) continue;
+    const existingEffect = token.actor.effects.find(e => e.origin === sourceEffect.uuid);
+    const shouldApply = auraShouldApply(sourceEffect, token);
+    if (existingEffect && !shouldApply) toRemove.push(existingEffect);
+    else if (!existingEffect && shouldApply) toAdd.push(sourceEffect.uuid);
+  }
+  if (toRemove.length) await removeAndReplaceAuras(toRemove, token.parent);
+  if (toAdd.length) await game.users.activeGM.query("auraeffects.applyAuraEffects", {[token.actor.uuid]: toAdd});
+}
+
+/**
+ * Get region creation data from an aura effect and a given token
+ * @param {ActiveEffect} effect 
+ * @param {TokenDocument} token
+ * @returns {RegionData}
+ */
+function getRegionDataFromEffect(effect, token) {
+  if (effect.type !== "auraeffects.aura") return {};
+  const tokenOwner = game.users.getDesignatedUser(u => u.character === token.actor) ?? game.users.activeGM
+  const regionData = {
+    attachment: {
+      token: token.id
+    },
+    color: (effect.system.color ?? tokenOwner?.color)?.css,
+    displayMeasurements: false,
+    flags: {
+      "auraeffects.origin": effect.uuid
+    },
+    highlightMode: "coverage", // TODO
+    levels: [token.level],
+    locked: true,
+    name: effect.name,
+    restriction: {enabled: true}, // TODO
+    shapes: [{
+      type: "emanation",
+      base: {
+        type: "token",
+        x: token._source.x,
+        y: token._source.y,
+        width: token._source.width,
+        height: token._source.height,
+        shape: token._source.shape
+      },
+      gridBased: true,
+      hole: false,
+      radius: token.parent.dimensions.distancePixels * effect.system.distance
+    }],
+    visibility: effect.system.showRadius ? CONST.REGION_VISIBILITY.ALWAYS : CONST.REGION_VISIBILITY.LAYER_UNLOCKED
+  };
+  return regionData;
+}
+
 export {
-  getNearbyTokens,
-  getTokenToTokenDistance,
-  isFinalMovementComplete,
   getAllAuraEffects,
+  getAuraRegions,
   getExtendedParts,
   getExtendedTabs,
   executeScript,
   removeAndReplaceAuras,
-  getChangingSceneAuras
+  updateAllAuraRegions,
+  getRegionDataFromEffect,
+  refreshConditionalAuras,
+  auraShouldApply
 };

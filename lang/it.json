@@ -92,10 +92,6 @@
                 "Hint": "Disattiva il testo scorrevole che appare quando si aggiungono o rimuovono effetti da aura su un attore.",
                 "Name": "Disattiva Testo Scorrevole per Aura"
             },
-            "DisableVisuals": {
-                "Hint": "Disattiva completamente la visualizzazione del raggio aura, ignorando le impostazioni degli effetti.",
-                "Name": "Disattiva Visualizzazione"
-            },
             "ExactCircles": {
                 "Hint": "Se abilitato, le aure saranno mostrate come cerchi perfetti quando \"Diagonali a Griglia\" è impostato su \"Esatte\" (può causare errori visivi ai bordi per aure grandi).",
                 "Name": "Mostra Cerchi con Diagonali Esatte"

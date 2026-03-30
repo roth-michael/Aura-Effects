@@ -92,10 +92,6 @@
                 "Hint": "Desabilite o texto de rolagem que aparece ao adicionar/remover efeitos causados pela aura ao ator de um token.",
                 "Name": "Desativar Rolagem de Texto de Aura Effects"
             },
-            "DisableVisuals": {
-                "Hint": "Desabilite completamente a visualização do raio da aura, independentemente das configurações de efeito.",
-                "Name": "Desativar Efeitos Visuais"
-            },
             "ExactCircles": {
                 "Hint": "Quando ativado, as auras visualizadas serão mostradas como círculos perfeitos quando a opção \"Diagonais da Grade\" estiver definida como \"Exata\". (Isso pode resultar em visualizações imprecisas ao redor das bordas dos círculos, especialmente com raios de aura maiores).",
                 "Name": "Mostrar Círculos com Diagonais Exatas"

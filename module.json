@@ -3,9 +3,9 @@
   "title": "Aura Effects",
   "version": "#{VERSION}#",
   "compatibility": {
-    "minimum": "13",
-    "verified": "13.351",
-    "maximum": "13"
+    "minimum": "14",
+    "verified": "14.358",
+    "maximum": "14"
   },
   "authors": [
     {

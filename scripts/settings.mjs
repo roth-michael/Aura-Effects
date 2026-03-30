@@ -1,17 +1,4 @@
-import { updateAllVisualizations } from "./auraVisualization.mjs";
-
 export function registerSettings() {
-  game.settings.register("auraeffects", "disableVisuals", {
-    name: "AURAEFFECTS.SETTINGS.DisableVisuals.Name",
-    hint: "AURAEFFECTS.SETTINGS.DisableVisuals.Hint",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: () => {
-      if (canvas?.ready) updateAllVisualizations();
-    }
-  });
   game.settings.register("auraeffects", "exactCircles", {
     name: "AURAEFFECTS.SETTINGS.ExactCircles.Name",
     hint: "AURAEFFECTS.SETTINGS.ExactCircles.Hint",
@@ -20,7 +7,8 @@ export function registerSettings() {
     type: Boolean,
     default: false,
     onChange: () => {
-      if (canvas?.ready) updateAllVisualizations();
+      // TODO: What do we wanna do here
+      // if (canvas?.ready) updateAllVisualizations();
     }
   });
   game.settings.register("auraeffects", "preferLatest", {
