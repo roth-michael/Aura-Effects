@@ -48,10 +48,6 @@
                         "hint": "Se abilitato, le modifiche saranno valutate prima di applicare l’effetto, usando i dati di tiro dell’attore sorgente se necessario.",
                         "label": "Valuta Modifiche in Anticipo"
                     },
-                    "opacity": {
-                        "hint": "Livello di opacità o trasparenza dell’aura visibile.",
-                        "label": "Opacità"
-                    },
                     "overrideName": {
                         "hint": "Nome che avrà l’effetto applicato (lascia vuoto per usare il nome dell’effetto base).",
                         "label": "Nome dell’Effetto"

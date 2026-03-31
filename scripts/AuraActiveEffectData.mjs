@@ -1,6 +1,5 @@
 import { DISPOSITIONS } from "./constants.mjs";
 import { executeScript } from "./helpers.mjs";
-/** @import { ActiveEffect } from "@client/documents/_module.mjs"; */
 
 const { ArrayField, BooleanField, ColorField, JavaScriptField, NumberField, SetField, SchemaField, StringField } = foundry.data.fields;
 
@@ -17,18 +16,18 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
         applyToSelf: new BooleanField({ initial: true }),
         bestFormula: new StringField({ initial: "" }),
         canStack: new BooleanField({ initial: false }),
-        // TODO: CHANGE THIS
-        collisionTypes: new SetField(new StringField({
+        collisionType: new StringField({
           choices: {
+            "": "COMMON.None",
             light: "WALL.FIELDS.light.label",
             move: "WALL.FIELDS.move.label",
             sight: "WALL.FIELDS.sight.label",
             sound: "WALL.FIELDS.sound.label"
           },
           required: true,
-          blank: false
-        }), {
-          initial: ["move"],
+          blank: true,
+          nullable: true,
+          initial: source => source.system?.collisionTypes?.[0] ?? "move"
         }),
         color: new ColorField(),
         combatOnly: new BooleanField({ initial: false }),
@@ -43,12 +42,6 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           }
         }),
         evaluatePreApply: new BooleanField({ initial: false }),
-        opacity: new NumberField({
-          min: 0,
-          max: 1,
-          step: 0.05,
-          initial: 0.25
-        }),
         overrideName: new StringField({ initial: '' }),
         script: new JavaScriptField(),
         stashedChanges: new ArrayField(new SchemaField({
@@ -58,7 +51,21 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           priority: new NumberField()
         })),
         stashedStatuses: new SetField(new StringField()),
-        showRadius: new BooleanField({ initial: false })
+        showRadius: new BooleanField({ initial: false }),
+
+        // TODO: Remove this, eventually
+        collisionTypes: new SetField(new StringField({
+          choices: {
+            light: "WALL.FIELDS.light.label",
+            move: "WALL.FIELDS.move.label",
+            sight: "WALL.FIELDS.sight.label",
+            sound: "WALL.FIELDS.sound.label"
+          },
+          required: false,
+          blank: false
+        }), {
+          initial: ["move"],
+        })
       }
     }
   
@@ -76,7 +83,7 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
     get distance() {
       return new Roll(this.distanceFormula || "0", this.parent.parent?.getRollData?.()).evaluateSync({ strict: false }).total;
     }
-  
+
     prepareDerivedData() {
       super.prepareDerivedData?.();
       let actor = this.parent.parent;

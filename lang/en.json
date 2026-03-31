@@ -15,9 +15,9 @@
                         "hint": "If enabled, other auras of the same name can apply at the same time to any applicable tokens.",
                         "label": "Aura Can Stack"
                     },
-                    "collisionTypes": {
-                        "hint": "Which, if any, types of wall will stop this aura.",
-                        "label": "Collision Types"
+                    "collisionType": {
+                        "hint": "Which, if any, type of wall will stop this aura.",
+                        "label": "Collision Type"
                     },
                     "color": {
                         "hint": "If blank, will inherit User color (or GM's color, if no user has the actor set as their character).",
@@ -47,10 +47,6 @@
                     "evaluatePreApply": {
                         "hint": "If enabled, change values will be evaluated prior to effect application, using the source actor's roll data if necessary.",
                         "label": "Evaluate Changes Early"
-                    },
-                    "opacity": {
-                        "hint": "How opaque or transparent the aura should appear.",
-                        "label": "Opacity"
                     },
                     "overrideName": {
                         "hint": "What name the applied effect should have (leave blank to use base effect's name).",
@@ -95,6 +91,10 @@
             "ExactCircles": {
                 "Hint": "When enabled, visualized auras will be shown as perfect circles when \"Grid Diagonals\" is set to \"Exact.\" (This can result in inaccurate visualizations around the edges of circles, especially with larger aura radii).",
                 "Name": "Show Circles with Exact Diagonals"
+            },
+            "HighlightMode": {
+                "Hint": "Configure whether aura regions should highlight the true shapes or the grid spaces covered.",
+                "Name": "Aura Highlight Mode"
             },
             "PreferLatest": {
                 "Hint": "When enabled, the most recent instance of a non-stackable Aura will be preferred, if there is no \"best\" aura. By default, ties in \"best\" go to the existing effect.",

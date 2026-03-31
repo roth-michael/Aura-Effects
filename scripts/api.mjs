@@ -57,7 +57,7 @@ function getMigratedEffectData(oldEffect, oldSettings) {
     radius = "0",
     // nameOverride -> system.overrideName
     nameOverride = "",
-    // wallsBlock -> move to system.collisionTypes with movement ig
+    // wallsBlock -> move to system.collisionType with movement ig
     wallsBlock = "system",
     // ignoreSelf -> system.applyToSelf
     ignoreSelf = false,
@@ -124,11 +124,11 @@ function getMigratedEffectData(oldEffect, oldSettings) {
     diffEffectData.type = "auraeffects.aura";
     diffEffectData.system = _replace({
       applyToSelf: !ignoreSelf,
-      collisionTypes: wallsBlock === "system"
-        ? oldSettings.wallsBlock
+      collisionType: wallsBlock === "system"
+        ? oldSettings.wallsBlock?.[0]
         : wallsBlock === "true"
-          ? ["move"]
-          : [],
+          ? "move"
+          : "",
       disableOnHidden: hidden,
       distanceFormula: radius,
       disposition: aura === "All"

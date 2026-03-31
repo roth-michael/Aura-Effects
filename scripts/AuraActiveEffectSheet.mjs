@@ -35,7 +35,6 @@ export default function AuraActiveEffectSheetMixin(ActiveEffectSheet) {
       updates.type = this.document.getFlag("auraeffects", "originalType") ?? "base";
       foundry.utils.setProperty(updates, "flags.auraeffects", _del);
       updates.system = _replace(this.document.toObject().system);
-      delete updates.system;
       this.document.update(updates);
     }
   }

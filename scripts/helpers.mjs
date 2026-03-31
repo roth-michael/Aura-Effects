@@ -229,6 +229,11 @@ async function refreshConditionalAuras(token) {
 function getRegionDataFromEffect(effect, token) {
   if (effect.type !== "auraeffects.aura") return {};
   const tokenOwner = game.users.getDesignatedUser(u => u.character === token.actor) ?? game.users.activeGM
+  const restriction = {enabled: false};
+  if (effect.system.collisionType.length) {
+    restriction.enabled = true;
+    restriction.type = effect.system.collisionType;
+  }
   const regionData = {
     attachment: {
       token: token.id
@@ -238,11 +243,11 @@ function getRegionDataFromEffect(effect, token) {
     flags: {
       "auraeffects.origin": effect.uuid
     },
-    highlightMode: "coverage", // TODO
+    highlightMode: game.settings.get("auraeffects", "highlightMode"),
     levels: [token.level],
     locked: true,
     name: effect.name,
-    restriction: {enabled: true}, // TODO
+    restriction,
     shapes: [{
       type: "emanation",
       base: {

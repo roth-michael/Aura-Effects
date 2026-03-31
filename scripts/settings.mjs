@@ -1,16 +1,16 @@
 export function registerSettings() {
-  game.settings.register("auraeffects", "exactCircles", {
-    name: "AURAEFFECTS.SETTINGS.ExactCircles.Name",
-    hint: "AURAEFFECTS.SETTINGS.ExactCircles.Hint",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: () => {
-      // TODO: What do we wanna do here
-      // if (canvas?.ready) updateAllVisualizations();
-    }
-  });
+  // TODO: What do we wanna do here
+  // game.settings.register("auraeffects", "exactCircles", {
+  //   name: "AURAEFFECTS.SETTINGS.ExactCircles.Name",
+  //   hint: "AURAEFFECTS.SETTINGS.ExactCircles.Hint",
+  //   scope: "client",
+  //   config: true,
+  //   type: Boolean,
+  //   default: false,
+  //   onChange: () => {
+  //     // if (canvas?.ready) updateAllVisualizations();
+  //   }
+  // });
   game.settings.register("auraeffects", "preferLatest", {
     name: "AURAEFFECTS.SETTINGS.PreferLatest.Name",
     hint: "AURAEFFECTS.SETTINGS.PreferLatest.Hint",
@@ -50,5 +50,17 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: false
+  });
+  game.settings.register("auraeffects", "highlightMode", {
+    name: "AURAEFFECTS.SETTINGS.HighlightMode.Name",
+    hint: "AURAEFFECTS.SETTINGS.HighlightMode.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      shapes: "REGION.HIGHLIGHT_MODES.shapes.label",
+      coverage: "REGION.HIGHLIGHT_MODES.coverage.label"
+    },
+    default: "coverage"
   });
 }

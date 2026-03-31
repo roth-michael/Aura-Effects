@@ -12,11 +12,10 @@
     {{#unless isDAEEnabled}}
         {{formGroup fields.evaluatePreApply value=source.system.evaluatePreApply rootId=rootId}}
     {{/unless}}
-    {{formGroup fields.collisionTypes value=source.system.collisionTypes localize=true rootId=rootId}}
+    {{formGroup fields.collisionType value=source.system.collisionType localize=true rootId=rootId}}
     {{formGroup fields.combatOnly value=source.system.combatOnly rootId=rootId}}
     {{formGroup fields.disableOnHidden value=source.system.disableOnHidden rootId=rootId}}
     {{formGroup fields.showRadius value=source.system.showRadius rootId=rootId}}
     {{formGroup fields.color value=source.system.color rootId=rootId}}
-    {{formGroup fields.opacity value=source.system.opacity rootId=rootId}}
     {{formGroup fields.script value=source.system.script rootId=rootId}}
 </section>

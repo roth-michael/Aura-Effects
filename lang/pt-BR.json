@@ -48,10 +48,6 @@
                         "hint": "Se habilitado, os valores alterados serão avaliados antes da aplicação do efeito, usando os dados de rolagem do ator de origem, se necessário.",
                         "label": "Avaliar Mudanças Cedo"
                     },
-                    "opacity": {
-                        "hint": "Quão opaca ou transparente a aura deve parecer.",
-                        "label": "Opacidade"
-                    },
                     "overrideName": {
                         "hint": "Qual nome o efeito aplicado deve ter (deixe em branco para usar o nome do efeito base).",
                         "label": "Nome do Efeito"

@@ -87,7 +87,7 @@ async function applyAuraEffects(actorToEffectsMap) {
 }
 
 /**
- * TODO
+ * For a given token, batch region creation, update, and deletion
  * @param {string} tokenUuid 
  * @param {RegionData[]} toCreate 
  * @param {RegionData[]} toUpdate

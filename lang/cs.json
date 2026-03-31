@@ -48,10 +48,6 @@
                         "hint": "Po zaškrtnutí budou změny vyhodnoceny před aplikací efektu s využitím dat hodu zdrojového aktéra, pokud je třeba.",
                         "label": "Vyhodnotit změny dříve"
                     },
-                    "opacity": {
-                        "hint": "Jak průhledná či neprůhledná má aura být.",
-                        "label": "Neprůhlednost"
-                    },
                     "overrideName": {
                         "hint": "Jaký název má mít použitý efekt (pro převzetí názvu základního efektu ponech prázdné).",
                         "label": "Název efektu"

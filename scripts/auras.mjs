@@ -180,7 +180,7 @@ function injectAuraButton(app, html) {
     updates.type = "auraeffects.aura";
     foundry.utils.setProperty(updates, "flags.auraeffects.originalType", currType);
     const currSystem = app.document.toObject().system;
-    updates.system = _relpace({
+    updates.system = _replace({
       ...currSystem,
       showRadius: game.settings.get("auraeffects", "defaultVisibility")
     });
