@@ -4,7 +4,7 @@
   "version": "#{VERSION}#",
   "compatibility": {
     "minimum": "14",
-    "verified": "14.358",
+    "verified": "14.359",
     "maximum": "14"
   },
   "authors": [
