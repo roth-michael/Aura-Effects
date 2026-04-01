@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "compile": "node build.mjs compile",
+    "extract": "node build.mjs extract"
+  },
+  "devDependencies": {
+    "@foundryvtt/foundryvtt-cli": "^3.0.3",
+    "commander": "^14.0.3"
+  }
+}

@@ -48,10 +48,6 @@
                         "hint": "Po zaškrtnutí budou změny vyhodnoceny před aplikací efektu s využitím dat hodu zdrojového aktéra, pokud je třeba.",
                         "label": "Vyhodnotit změny dříve"
                     },
-                    "opacity": {
-                        "hint": "Jak průhledná či neprůhledná má aura být.",
-                        "label": "Neprůhlednost"
-                    },
                     "overrideName": {
                         "hint": "Jaký název má mít použitý efekt (pro převzetí názvu základního efektu ponech prázdné).",
                         "label": "Název efektu"
@@ -90,10 +86,6 @@
             "DisableScrollingText": {
                 "Hint": "Zakáže posouvající se text zobrazovaný při přidání/odebrání efektu způsobeného aurou na aktéra tokenu.",
                 "Name": "Zakázat posouvající se text?"
-            },
-            "DisableVisuals": {
-                "Hint": "Úplně zakáže vizualizaci poloměru aury, bez ohledu na nastavení efektu.",
-                "Name": "Zakázat vizualizaci?"
             },
             "ExactCircles": {
                 "Hint": "Pokud je nastavení \"Grid Diagonals\" nastaveno na \"Exact.\", budou po zaškrtnutí vizualizované aury zobrazovány jako dokonalé kruhy. (Může vést k nepřesné vizualizaci na okrajích kruhů, zejména u větších aur.)",

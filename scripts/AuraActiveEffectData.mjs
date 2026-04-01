@@ -1,6 +1,5 @@
 import { DISPOSITIONS } from "./constants.mjs";
 import { executeScript } from "./helpers.mjs";
-/** @import { ActiveEffect } from "@client/documents/_module.mjs"; */
 
 const { ArrayField, BooleanField, ColorField, JavaScriptField, NumberField, SetField, SchemaField, StringField } = foundry.data.fields;
 
@@ -8,26 +7,23 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
   return class AuraActiveEffectData extends ActiveEffectClass {
     static LOCALIZATION_PREFIXES = [...super.LOCALIZATION_PREFIXES, "AURAEFFECTS.ACTIVEEFFECT.Aura"];
     static defineSchema() {
-      let schema = {};
-      try {
-        schema = super.defineSchema(); // Throws if TypeDataModel
-      } catch (err) {}
+      const schema = super.defineSchema();
       return {
         ...schema,
         applyToSelf: new BooleanField({ initial: true }),
         bestFormula: new StringField({ initial: "" }),
         canStack: new BooleanField({ initial: false }),
-        collisionTypes: new SetField(new StringField({
+        collisionType: new StringField({
           choices: {
+            "": "COMMON.None",
             light: "WALL.FIELDS.light.label",
             move: "WALL.FIELDS.move.label",
             sight: "WALL.FIELDS.sight.label",
             sound: "WALL.FIELDS.sound.label"
           },
           required: true,
-          blank: false
-        }), {
-          initial: ["move"],
+          blank: true,
+          initial: "move"
         }),
         color: new ColorField(),
         combatOnly: new BooleanField({ initial: false }),
@@ -42,12 +38,6 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           }
         }),
         evaluatePreApply: new BooleanField({ initial: false }),
-        opacity: new NumberField({
-          min: 0,
-          max: 1,
-          step: 0.05,
-          initial: 0.25
-        }),
         overrideName: new StringField({ initial: '' }),
         script: new JavaScriptField(),
         stashedChanges: new ArrayField(new SchemaField({
@@ -75,15 +65,23 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
     get distance() {
       return new Roll(this.distanceFormula || "0", this.parent.parent?.getRollData?.()).evaluateSync({ strict: false }).total;
     }
-  
+
+    static migrateData(source, options, state) {
+      if (!("collisionType" in source) && source.collisionTypes?.length) {
+        source.collisionType = source.collisionTypes[0];
+        delete source.collisionTypes;
+      }
+      return super.migrateData(source, options, state);
+    }
+
     prepareDerivedData() {
       super.prepareDerivedData?.();
       let actor = this.parent.parent;
       if (actor instanceof Item) actor = actor.actor;
       if (!this.applyToSelf) {
-        this.stashedChanges = this.parent.changes;
+        this.stashedChanges = this.changes;
         this.stashedStatuses = this.parent.statuses;
-        this.parent.changes = [];
+        this.changes = [];
         this.parent.statuses = new Set();
       } else {
         const token = actor?.getActiveTokens(false, true)[0];
@@ -91,12 +89,12 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           // Don't try to execute the script for synthetic actors that haven't yet had their delta prepared, lest we enter a loop
           const deltaPrepped = !actor.isToken || Object.getOwnPropertyDescriptor(token, "delta")?.value;
           if (deltaPrepped && !executeScript(token, token, this.parent)) {
-            this.stashedChanges = this.parent.changes;
+            this.stashedChanges = this.changes;
             this.stashedStatuses = this.parent.statuses;
-            this.parent.changes = [];
+            this.changes = [];
             this.parent.statuses = new Set();
           } else {
-            if (this.stashedChanges?.length) this.parent.changes = this.stashedChanges;
+            if (this.stashedChanges?.length) this.changes = this.stashedChanges;
             if (this.stashedStatuses?.size) this.parent.statuses = this.stashedStatuses;
           }
         }
@@ -105,9 +103,9 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
         const nameMatch = this.overrideName || this.parent.name;
         const existing = actor?.effects.find(e => e.flags?.auraeffects?.fromAura && e.name === nameMatch);
         if (existing) {
-          this.stashedChanges = this.parent.changes;
+          this.stashedChanges = this.changes;
           this.stashedStatuses = this.parent.statuses;
-          this.parent.changes = [];
+          this.changes = [];
           this.parent.statuses = new Set();
         }
       }

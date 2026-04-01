@@ -86,7 +86,45 @@ async function applyAuraEffects(actorToEffectsMap) {
   return true;
 }
 
+/**
+ * For a given token, batch region creation, update, and deletion
+ * @param {string} tokenUuid 
+ * @param {RegionData[]} toCreate 
+ * @param {RegionData[]} toUpdate
+ * @param {string[]} toDelete 
+ */
+async function updateRegionsForToken({tokenUuid, toCreate, toUpdate, toDelete}) {
+  const token = await fromUuid(tokenUuid);
+  const scene = token?.parent;
+  if ( !scene ) return;
+  const batchOperations = [];
+  if ( toCreate.length ) batchOperations.push({
+    action: "create",
+    documentName: "Region",
+    parent: scene,
+    data: toCreate
+  });
+  if ( toUpdate.length ) batchOperations.push({
+    action: "update",
+    documentName: "Region",
+    parent: scene,
+    updates: toUpdate
+  });
+  if ( toDelete.length ) batchOperations.push({
+    action: "delete",
+    documentName: "Region",
+    parent: scene,
+    ids: toDelete
+  });
+  if ( !batchOperations.length ) return;
+  await gmQueue.add(() => {
+    foundry.documents.modifyBatch(batchOperations);
+  });
+  return true;
+}
+
 export {
   applyAuraEffects,
-  deleteEffects
+  deleteEffects,
+  updateRegionsForToken
 };

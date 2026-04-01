@@ -24,7 +24,7 @@ const migrations = {
           alias: "Aura Effects"
         },
         whisper: [game.user],
-        content: game.i18n.localize("AURAEFFECTS.Migrations.ActiveAurasChatMessage")
+        content: _loc("AURAEFFECTS.Migrations.ActiveAurasChatMessage")
       })
     }
   }

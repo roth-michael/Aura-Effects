@@ -33,9 +33,8 @@ export default function AuraActiveEffectSheetMixin(ActiveEffectSheet) {
       const updates = this._processFormData(null, this.form, new foundry.applications.ux.FormDataExtended(this.form));
       if (foundry.utils.getType(updates.changes) !== "Array") updates.changes = Object.values(updates.changes ?? {});
       updates.type = this.document.getFlag("auraeffects", "originalType") ?? "base";
-      foundry.utils.setProperty(updates, "flags.-=auraeffects", null);
-      updates["==system"] = this.document.toObject().system;
-      delete updates.system;
+      foundry.utils.setProperty(updates, "flags.auraeffects", _del);
+      updates.system = _replace(this.document.toObject().system);
       this.document.update(updates);
     }
   }

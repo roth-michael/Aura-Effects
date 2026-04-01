@@ -1,4 +1,4 @@
-import { getAllAuraEffects, getNearbyTokens, removeAndReplaceAuras } from "../helpers.mjs";
+import { getAllAuraEffects, removeAndReplaceAuras } from "../helpers.mjs";
 
 /** @import { Actor } from "@client/documents/_module.mjs" */
 
@@ -17,9 +17,8 @@ function onTransformation(actor) {
   const [activeSourceEffects, inactiveSourceEffects] = getAllAuraEffects(actor);
   const toDelete = [];
   for (const sourceEffect of activeSourceEffects) {
-    const { distance: radius } = sourceEffect.system;
-    const nearby = getNearbyTokens(sourceToken, radius);
-    for (const token of nearby) {
+    for (const token of token.parent.tokens) {
+      if (token === sourceToken) continue;
       const badEffect = token.actor?.effects.find(e => e.origin === sourceEffect.uuid);
       if (badEffect) toDelete.push(badEffect);
     }

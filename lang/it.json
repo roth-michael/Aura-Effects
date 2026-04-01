@@ -48,10 +48,6 @@
                         "hint": "Se abilitato, le modifiche saranno valutate prima di applicare l’effetto, usando i dati di tiro dell’attore sorgente se necessario.",
                         "label": "Valuta Modifiche in Anticipo"
                     },
-                    "opacity": {
-                        "hint": "Livello di opacità o trasparenza dell’aura visibile.",
-                        "label": "Opacità"
-                    },
                     "overrideName": {
                         "hint": "Nome che avrà l’effetto applicato (lascia vuoto per usare il nome dell’effetto base).",
                         "label": "Nome dell’Effetto"
@@ -91,10 +87,6 @@
             "DisableScrollingText": {
                 "Hint": "Disattiva il testo scorrevole che appare quando si aggiungono o rimuovono effetti da aura su un attore.",
                 "Name": "Disattiva Testo Scorrevole per Aura"
-            },
-            "DisableVisuals": {
-                "Hint": "Disattiva completamente la visualizzazione del raggio aura, ignorando le impostazioni degli effetti.",
-                "Name": "Disattiva Visualizzazione"
             },
             "ExactCircles": {
                 "Hint": "Se abilitato, le aure saranno mostrate come cerchi perfetti quando \"Diagonali a Griglia\" è impostato su \"Esatte\" (può causare errori visivi ai bordi per aure grandi).",

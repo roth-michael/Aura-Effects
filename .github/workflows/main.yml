@@ -40,6 +40,17 @@ jobs:
           MANIFEST: ${{env.latest_manifest_url}}
           DOWNLOAD: ${{env.release_module_url}}
           CHANGELOG: ${{env.changelog_url}}
+
+      - name: "Install Node"
+        uses: actions/setup-node@v2
+        with:
+          node-version: 24
+
+      - name: "Install Dependencies"
+        run: npm ci
+
+      - name: "Compile Packs"
+        run: npm run compile
       
       - name: Create Archive
         run: |

@@ -1,5 +1,18 @@
 # Aura Effects Changelog
 
+## Version 2.0.0
+- Updated for V14! This module may gradually become less useful as systems begin to implement auras on their own. For now:
+  - An Aura-type effect existing on an Actor will result in the creation of a token-attached Region with no explicit behaviors
+  - The region's shape will be that of an Emanation. If there is cause for it to instead be a circle, please raise a ticket and I will consider implementing that
+  - The region's bounds will be used instead of pure distance checks to determine whether tokens are "within range" of an Aura
+  - Aura visualization is offloaded to properties of the region, rather than its own container on the grid layer
+  - For the time being, and unless it becomes evident that a change would make sense, all other logic will remain the same
+- Because regions can only be restricted by a single wall type, the "Collision Types" option has changed from a multiselect to a single "Collision Type" select
+- Because region visibility is attached to the document itself, the per-client toggle for _all_ aura visibility has been removed
+- Because region opacity is not currently modifiable, the opacity option has been removed for the time being
+- Because any visualized auras now represent the mechanical area impacted, the option to "show exact circles" has been removed
+- Note: Currently, inter-level effects are _not_ being considered. This is a feature I would like to add in the future
+
 ## Version 1.5.2
 - Translation updates (thanks Kharmans!)
 
