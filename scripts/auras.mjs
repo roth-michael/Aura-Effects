@@ -216,14 +216,14 @@ function registerQueries() {
 }
 
 function registerAuraType() {
-  const baseClass = CONFIG.ActiveEffect.dataModels.base ?? foundry.abstract.TypeDataModel;
-  try {
-    const origSchemaKeys = Object.keys(baseClass.defineSchema()); // Throws if TypeDataModel
-    const auraSchemaKeys = Object.keys(AuraActiveEffectDataMixin(foundry.abstract.TypeDataModel).defineSchema());
-    mixBase = !auraSchemaKeys.some(k => origSchemaKeys.includes(k));
-  } catch (err) {}
+  const defaultClass = foundry.data.ActiveEffectTypeDataModel;
+  const baseClass = CONFIG.ActiveEffect.dataModels.base;
+  const acceptableOverlapKeys = Object.keys(defaultClass.defineSchema());
+  const origSchemaKeys = Object.keys(baseClass.defineSchema());
+  const auraSchemaKeys = Object.keys(AuraActiveEffectDataMixin(defaultClass).defineSchema());
+  mixBase = !auraSchemaKeys.some(k => origSchemaKeys.includes(k) && !acceptableOverlapKeys.includes(k));
   Object.assign(CONFIG.ActiveEffect.dataModels, {
-    "auraeffects.aura": AuraActiveEffectDataMixin(mixBase ? baseClass : foundry.abstract.TypeDataModel)
+    "auraeffects.aura": AuraActiveEffectDataMixin(mixBase ? baseClass : defaultClass)
   });
 }
 
@@ -243,7 +243,6 @@ Hooks.once("init", () => {
   registerQueries();
   registerAuraType();
   registerSettings();
-  CONFIG.Canvas.polygonBackends.aura = foundry.canvas.geometry.ClockwiseSweepPolygon;
 });
 
 Hooks.once("ready", () => {

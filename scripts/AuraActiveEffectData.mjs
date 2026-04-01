@@ -7,10 +7,7 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
   return class AuraActiveEffectData extends ActiveEffectClass {
     static LOCALIZATION_PREFIXES = [...super.LOCALIZATION_PREFIXES, "AURAEFFECTS.ACTIVEEFFECT.Aura"];
     static defineSchema() {
-      let schema = {};
-      try {
-        schema = super.defineSchema(); // Throws if TypeDataModel
-      } catch (err) {}
+      const schema = super.defineSchema();
       return {
         ...schema,
         applyToSelf: new BooleanField({ initial: true }),
@@ -27,7 +24,7 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           required: true,
           blank: true,
           nullable: true,
-          initial: source => source.system?.collisionTypes?.[0] ?? "move"
+          initial: "move"
         }),
         color: new ColorField(),
         combatOnly: new BooleanField({ initial: false }),
@@ -51,21 +48,7 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           priority: new NumberField()
         })),
         stashedStatuses: new SetField(new StringField()),
-        showRadius: new BooleanField({ initial: false }),
-
-        // TODO: Remove this, eventually
-        collisionTypes: new SetField(new StringField({
-          choices: {
-            light: "WALL.FIELDS.light.label",
-            move: "WALL.FIELDS.move.label",
-            sight: "WALL.FIELDS.sight.label",
-            sound: "WALL.FIELDS.sound.label"
-          },
-          required: false,
-          blank: false
-        }), {
-          initial: ["move"],
-        })
+        showRadius: new BooleanField({ initial: false })
       }
     }
   
@@ -82,6 +65,14 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
   
     get distance() {
       return new Roll(this.distanceFormula || "0", this.parent.parent?.getRollData?.()).evaluateSync({ strict: false }).total;
+    }
+
+    static migrateData(source, options, state) {
+      if (!("collisionType" in source) && source.collisionTypes?.length) {
+        source.collisionType = source.collisionTypes[0];
+        delete source.collisionTypes;
+      }
+      return super.migrateData(source, options, state);
     }
 
     prepareDerivedData() {
