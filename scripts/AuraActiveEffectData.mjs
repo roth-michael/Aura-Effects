@@ -23,7 +23,6 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
           },
           required: true,
           blank: true,
-          nullable: true,
           initial: "move"
         }),
         color: new ColorField(),
