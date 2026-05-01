@@ -42,7 +42,7 @@
                     },
                     "distanceFormula": {
                         "hint": "Especifica o raio em que esta aura se estende (dados de rolagem são aceitos).",
-                        "label": "Distância"
+                        "label": "Alcance"
                     },
                     "evaluatePreApply": {
                         "hint": "Se habilitado, os valores alterados serão avaliados antes da aplicação do efeito, usando os dados de rolagem do ator de origem, se necessário.",
