@@ -1,5 +1,9 @@
 # Aura Effects Changelog
 
+## Version 2.0.1
+- Fixed a bug where "evaluate early" auras would sometimes assume non-strings were strings
+- Translation updates (thanks Kharmans!)
+
 ## Version 2.0.0
 - Updated for V14! This module may gradually become less useful as systems begin to implement auras on their own. For now:
   - An Aura-type effect existing on an Actor will result in the creation of a token-attached Region with no explicit behaviors

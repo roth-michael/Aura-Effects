@@ -59,13 +59,16 @@ async function applyAuraEffects(actorToEffectsMap) {
             if (currBest >= bestValue) return null;
           }
         }
+        const changes = effectData.system.changes ?? effectData.changes;
         if (game.modules.get("dae")?.active) {
-          for (const change of effectData.changes) {
+          for (const change of changes) {
+            if (typeof change.value !== "string") continue;
             change.value = Roll.replaceFormulaData(change.value, effect.parent?.getRollData?.());
             change.value = change.value.replaceAll("##", "@");
           }
         } else if (effect.system.evaluatePreApply) {
-          for (const change of effectData.changes) {
+          for (const change of changes) {
+            if (typeof change.value !== "string") continue;
             change.value = Roll.replaceFormulaData(change.value, effect.parent?.getRollData?.());
           }
         }
