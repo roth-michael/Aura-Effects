@@ -50,7 +50,7 @@ function getAllAuraEffects(actor) {
  * @returns {Set<RegionDocument>} 
  */
 function getAuraRegions(token) {
-  return token.regions.filter(r => (r.attachment.token !== token) && (r.getFlag("auraeffects", "origin")));
+  return token.regions.filter(r => r.getFlag("auraeffects", "origin"));
 }
 
 /**
@@ -66,6 +66,7 @@ function auraShouldApply(effect, token) {
   // Somehow despite being in range, no source token
   const sourceToken = token.parent.tokens.find(t => t.actor === effect.actor);
   if (!sourceToken) return false;
+  if (!effect.system.applyToSelf && (sourceToken.actor === token.actor)) return false;
   // Disposition doesn't match
   const disposition = token.disposition * sourceToken.disposition;
   if (![0, disposition].includes(effect.system.disposition)) return false;

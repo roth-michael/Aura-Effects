@@ -1,5 +1,10 @@
 # Aura Effects Changelog
 
+## Version 2.2.0
+- Much as it pains me, auras which apply to self will now in fact create a new effect on the source actor. This change is necessary to ensure that conditional scripts apply properly to self-applying auras.
+- These new effects will be given "Never" visibility on the token, regardless of the source effect's setting
+- Effect creation across actors is now batched, which might result in some small performance gains
+
 ## Version 2.0.1
 - Fixed a bug where "evaluate early" auras would sometimes assume non-strings were strings
 - Translation updates (thanks Kharmans!)

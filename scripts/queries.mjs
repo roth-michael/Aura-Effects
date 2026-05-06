@@ -25,14 +25,16 @@ async function deleteEffects({ effectUuids }) {
 async function applyAuraEffects(actorToEffectsMap) {
   const disableAnimation = game.settings.get("auraeffects", "disableScrollingText");
   await gmQueue.add(() => {
-    return Promise.all(Object.entries(actorToEffectsMap).map(([actorUuid, effectUuids]) => {
+    const allBatchOperations = [];
+    for (const [actorUuid, effectUuids] of Object.entries(actorToEffectsMap)) {
       const actor = fromUuidSync(actorUuid);
+      const batchCreate = [];
+      const batchDelete = [];
       const allEffects = actor.effects;
-      const effectsToDelete = [];
-      const effects = effectUuids.map(uuid => {
-        if (allEffects.some(e => e.origin === uuid)) return null;
+      for (const uuid of effectUuids) {
+        if (allEffects.some(e => e.origin === uuid)) continue;
         const effect = fromUuidSync(uuid);
-        if (!effect) return null;
+        if (!effect) continue;
         const effectData = foundry.utils.mergeObject(effect.toObject(), {
           name: effect.system.overrideName?.trim() || effect.name,
           origin: uuid,
@@ -46,17 +48,9 @@ async function applyAuraEffects(actorToEffectsMap) {
           const existingEffect = allEffects.find(e => e.flags?.auraeffects?.fromAura && e.name === effectData.name);
           if (existingEffect) {
             const currBest = existingEffect.flags.auraeffects.bestValue ?? 0;
-            if (!game.settings.get("auraeffects", "preferLatest") && (currBest >= bestValue)) return null;
-            else if (currBest > bestValue) return null; 
-            effectsToDelete.push(existingEffect.id);
-          }
-          const existingSourceEffect = allEffects.find(e => 
-            e.type === "auraeffects.aura"
-            && e.system.applyToSelf
-            && (e.system.overrideName.trim() || e.name) === effectData.name);
-          if (existingSourceEffect) {
-            const currBest = new Roll(existingSourceEffect.system.bestFormula.trim() || "0", existingSourceEffect.parent?.getRollData?.()).evaluateSync().total;
-            if (currBest >= bestValue) return null;
+            if (!game.settings.get("auraeffects", "preferLatest") && (currBest >= bestValue)) continue;
+            else if (currBest > bestValue) continue;
+            batchDelete.push(existingEffect.id);
           }
         }
         const changes = effectData.system.changes ?? effectData.changes;
@@ -72,19 +66,28 @@ async function applyAuraEffects(actorToEffectsMap) {
             change.value = Roll.replaceFormulaData(change.value, effect.parent?.getRollData?.());
           }
         }
-        return effectData;
-      }).filter(e => e).reduce((acc, effect) => {
-        const existing = acc.find(e => e.name === effect.name);
+        if (actor === effect.actor) effectData.showIcon = CONST.ACTIVE_EFFECT_SHOW_ICON.NEVER;
+        const existing = batchCreate.find(e => e.name === effect.name);
         const existingBestValue = existing?.flags.auraeffects.bestValue;
-        if (existingBestValue === undefined) return [...acc, effect];
-        const currBestValue = effect.flags.auraeffects.bestValue;
-        if (currBestValue > existingBestValue) acc.findSplice(e => e === existing, effect);
-        return acc;
-      }, []);
-      return actor.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete, { animate: !disableAnimation }).then(() => 
-        actor.createEmbeddedDocuments("ActiveEffect", effects, { animate: !disableAnimation })
-      );
-    }));
+        if (existingBestValue === undefined) batchCreate.push(effectData);
+        else if (effect.flags.auraeffects.bestValue > existingBestValue) batchCreate.findSplice(e => e === existing, effect);
+      }
+      if (batchDelete.length) allBatchOperations.push({
+        action: "delete",
+        documentName: "ActiveEffect",
+        parent: actor,
+        ids: batchDelete,
+        animate: !disableAnimation
+      });
+      if (batchCreate.length) allBatchOperations.push({
+        action: "create",
+        documentName: "ActiveEffect",
+        parent: actor,
+        data: batchCreate,
+        animate: !disableAnimation
+      });
+    }
+    if (allBatchOperations.length) return foundry.documents.modifyBatch(allBatchOperations);
   });
   return true;
 }

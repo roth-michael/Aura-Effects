@@ -78,37 +78,41 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
       super.prepareDerivedData?.();
       let actor = this.parent.parent;
       if (actor instanceof Item) actor = actor.actor;
-      if (!this.applyToSelf) {
-        this.stashedChanges = this.changes;
-        this.stashedStatuses = this.parent.statuses;
-        this.changes = [];
-        this.parent.statuses = new Set();
-      } else {
-        const token = actor?.getActiveTokens(false, true)[0];
-        if (token) {
-          // Don't try to execute the script for synthetic actors that haven't yet had their delta prepared, lest we enter a loop
-          const deltaPrepped = !actor.isToken || Object.getOwnPropertyDescriptor(token, "delta")?.value;
-          if (deltaPrepped && !executeScript(token, token, this.parent)) {
-            this.stashedChanges = this.changes;
-            this.stashedStatuses = this.parent.statuses;
-            this.changes = [];
-            this.parent.statuses = new Set();
-          } else {
-            if (this.stashedChanges?.length) this.changes = this.stashedChanges;
-            if (this.stashedStatuses?.size) this.parent.statuses = this.stashedStatuses;
-          }
-        }
-      }
-      if (!this.canStack) {
-        const nameMatch = this.overrideName || this.parent.name;
-        const existing = actor?.effects.find(e => e.flags?.auraeffects?.fromAura && e.name === nameMatch);
-        if (existing) {
-          this.stashedChanges = this.changes;
-          this.stashedStatuses = this.parent.statuses;
-          this.changes = [];
-          this.parent.statuses = new Set();
-        }
-      }
+      this.stashedChanges = this.changes;
+      this.stashedStatuses = this.parent.statuses;
+      this.changes = [];
+      this.parent.statuses = new Set();
+      // if (!this.applyToSelf) {
+      //   this.stashedChanges = this.changes;
+      //   this.stashedStatuses = this.parent.statuses;
+      //   this.changes = [];
+      //   this.parent.statuses = new Set();
+      // } else {
+      //   const token = actor?.getActiveTokens(false, true)[0];
+      //   if (token) {
+      //     // Don't try to execute the script for synthetic actors that haven't yet had their delta prepared, lest we enter a loop
+      //     const deltaPrepped = !actor.isToken || Object.getOwnPropertyDescriptor(token, "delta")?.value;
+      //     if (deltaPrepped && !executeScript(token, token, this.parent)) {
+      //       this.stashedChanges = this.changes;
+      //       this.stashedStatuses = this.parent.statuses;
+      //       this.changes = [];
+      //       this.parent.statuses = new Set();
+      //     } else {
+      //       if (this.stashedChanges?.length) this.changes = this.stashedChanges;
+      //       if (this.stashedStatuses?.size) this.parent.statuses = this.stashedStatuses;
+      //     }
+      //   }
+      // }
+      // if (!this.canStack) {
+      //   const nameMatch = this.overrideName || this.parent.name;
+      //   const existing = actor?.effects.find(e => e.flags?.auraeffects?.fromAura && e.name === nameMatch);
+      //   if (existing) {
+      //     this.stashedChanges = this.changes;
+      //     this.stashedStatuses = this.parent.statuses;
+      //     this.changes = [];
+      //     this.parent.statuses = new Set();
+      //   }
+      // }
     }
   }
 }
