@@ -1,5 +1,8 @@
 # Aura Effects Changelog
 
+## Version 2.1.1
+- Added German localization (thanks mhilbrunner!)
+
 ## Version 2.1.0
 - Much as it pains me, auras which apply to self will now in fact create a new effect on the source actor. This change is necessary to ensure that conditional scripts apply properly to self-applying auras.
 - These new effects will be given "Never" visibility on the token, regardless of the source effect's setting
