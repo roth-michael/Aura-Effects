@@ -1,0 +1,94 @@
+{
+    "AURAEFFECTS": {
+        "ACTIVEEFFECT": {
+            "Aura": {
+                "FIELDS": {
+                    "applyToSelf": {
+                        "hint": "Angehakt gilt die Aura für die Quell-Spielfigur.",
+                        "label": "Auf Selbst anwenden"
+                    },
+                    "bestFormula": {
+                        "hint": "Formel, die mit Daten der Quellfigur bestimmt, welcher nicht-stapelbare Effekt als der mächtigere angewendet wird. Ohne Formel gilt der erste angewendete Effekt.",
+                        "label": "\"Beste\"-Formel"
+                    },
+                    "canStack": {
+                        "hint": "Angehakt ist die Aura stapelbar (d.h. Auren mit selbem Namen können die selben Ziele mehrfach betreffen).",
+                        "label": "Aura stapelbar"
+                    },
+                    "collisionType": {
+                        "hint": "Welche Mauerarten diese Aura blockieren (falls überhaupt).",
+                        "label": "Kollisionstyp"
+                    },
+                    "color": {
+                        "hint": "Wenn leer wird die Spielerfarbe genutzt (oder die SL-Farbe, wenn der Spieler keinen festgelegten Charakter hat).",
+                        "label": "Farbe"
+                    },
+                    "combatOnly": {
+                        "hint": "Angehakt wird der Effekt außerhalb von Kämpfen unterdrückt.",
+                        "label": "Nur im Kampf"
+                    },
+                    "disableOnHidden": {
+                        "hint": "Angehakt wird der Effekt unterdrückt, während seine Spielfigur nicht sichbtar ist.",
+                        "label": "Deaktivieren wenn verborgen"
+                    },
+                    "disposition": {
+                        "Choices": {
+                            "Any": "Jede",
+                            "Friendly": "Freundlich",
+                            "Hostile": "Feindlich"
+                        },
+                        "hint": "Für welche Spielfigur-Gesinnung gilt dieser Effekt? (Im Verhältnis zur Quellfigur)",
+                        "label": "Gesinnung"
+                    },
+                    "distanceFormula": {
+                        "hint": "Radius der Aura (Wurfdaten/Formel nutzbar).",
+                        "label": "Entfernung"
+                    },
+                    "evaluatePreApply": {
+                        "hint": "Angehakt werden die Effekt-Änderungen ausgewertet, bevor der Effekt auf andere angewendet wird (wo nötig mit den Daten der Quell-Spielfigur).",
+                        "label": "Änderungen früh auswerten"
+                    },
+                    "overrideName": {
+                        "hint": "Name des angewendeten Effekts (leer wird der Name des zugrundeliegenden Effekts genutzt).",
+                        "label": "Effektname"
+                    },
+                    "script": {
+                        "hint": "Code-Ausdruck, der bestimmt, ob die Aura auf ein Ziel angewendet werden soll (wenn er leer ist oder true zurückgibt).",
+                        "label": "Bedingungs-Skript"
+                    },
+                    "showRadius": {
+                        "hint": "Ob die Ausmaße der Aura für alle Spieler angezeigt werden sollen.",
+                        "label": "Radius zeigen"
+                    }
+                }
+            }
+        },
+        "ConvertToAura": "Zu Aura konvertieren",
+        "ConvertToAuraHint": "Transformiert den Effekt in einen Aura-Quelleffekt.",
+        "ConvertToNormal": "Zu normalem Effekt zurücksetzen",
+        "ConvertToNormalHint": "Setzt den Effekt auf einen normalen Effekt zurück; Auraeinstellungen gehen verloren.",
+        "NoActiveGM": "Aureneffekte funktionieren nicht ohne eingeloggte Spielleitung.",
+        "SETTINGS": {
+            "DefaultVisibility": {
+                "Hint": "Aktiviert werden neue Aureneffekte standardmäßig visualisiert.",
+                "Name": "Aura-Effekte standardmäßig sichtbar"
+            },
+            "DisableScrollingText": {
+                "Hint": "Deaktiviert den scrollenden Statustext wenn Auren-Effekte einer Figur hinzugefügt oder entfernt werden.",
+                "Name": "Rollenden Text für Aura-Effekte deaktivieren"
+            },
+            "ExactCircles": {
+                "Hint": "Aktiviert werden Auren als perfekte Kreise visualisert, wenn \"Gitter-Diagonalen\" als \"Exakt\" eingestellt sind. (Dies kann zu ungenauen Visualisierungen am Rand von Kreisen führen, besonders mit größeren Radien).",
+                "Name": "Zeige Kreise mit exakten Diagonalen"
+            },
+            "HighlightMode": {
+                "Hint": "Legt fest, ob Aura-Regionen ihre wirklichen Formen oder betroffene Gitterflächen hervorheben sollen.",
+                "Name": "Aura Hervorhebungsmodus"
+            },
+            "PreferLatest": {
+                "Hint": "Aktiviert werden bei nicht-stapelbaren Auren die jüngsten Effekte priorisiert, wenn kein \"bester\" bestimmt werden kann. Standardmäßig gilt sonst der ältere Effekt.",
+                "Name": "Jüngste Aura bevorzugen"
+            }
+        }
+    }
+}
