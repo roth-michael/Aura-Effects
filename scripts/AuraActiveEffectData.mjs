@@ -53,7 +53,7 @@ export default function AuraActiveEffectDataMixin(ActiveEffectClass) {
   
     get isSuppressed() {
       if (super.isSuppressed) return true;
-      if (this.combatOnly && !game.combat?.active) return true;
+      if (this.combatOnly && this.parent.actor && !this.parent.actor.inCombat) return true;
       if (this.disableOnHidden) {
         let actor = this.parent.parent;
         if (actor instanceof Item) actor = actor.actor;

@@ -1,5 +1,12 @@
 # Aura Effects Changelog
 
+## Version 2.2.0
+- The "auraeffects.fromAura" flag will now contain the uuid of the source effect, and this will be used in lieu of the "origin" property, to avoid potential issues with systems that make changes to "origin"
+- Aura conditions will now be refreshed for all combatants when combat turn or round is modified
+- "Combat Only" auras now check whether the parent actor is in combat, not merely whether a combat exists
+- Auras will now be refreshed (conditions & whether they should be suppressed) on combatant creation/deletion, so "Combat Only" effects will now immediately suppress (or un-suppress) upon the token being added or removed from combat
+- Auras will now be refreshed when token disposition is changed
+
 ## Version 2.1.1
 - Added German localization (thanks mhilbrunner!)
 

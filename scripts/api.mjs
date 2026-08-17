@@ -142,7 +142,7 @@ function getMigratedEffectData(oldEffect, oldSettings) {
     });
     diffEffectData["flags.ActiveAuras"] = _del;
   } else if (applied) {
-    diffEffectData["flags.ActiveAuras"] = _replace({ fromAura: true });
+    diffEffectData["flags.ActiveAuras"] = _replace({ fromAura: oldEffect.origin ?? true });
   }
   return diffEffectData;
 }

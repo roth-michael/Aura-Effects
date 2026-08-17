@@ -47,10 +47,10 @@ function getAllAuraEffects(actor) {
 /**
  * Get all aura-providing regions that a token is currently within
  * @param {TokenDocument} token
- * @returns {Set<RegionDocument>} 
+ * @returns {RegionDocument[]} 
  */
 function getAuraRegions(token) {
-  return token.regions.filter(r => r.getFlag("auraeffects", "origin"));
+  return Array.from(token.regions.filter(r => r.getFlag("auraeffects", "origin")));
 }
 
 /**
@@ -121,8 +121,7 @@ async function removeAndReplaceAuras(effects, scene) {
       for (const sourceToken of allEmitting) {
         const effect = getSourceEffect(sourceToken, effectName);
         if (!effect) continue;
-        if (!getAuraRegions(targetToken).find(r => r.getFlag("auraeffects", "origin") === effect.uuid)) continue;
-        if (!executeScript(sourceToken, targetToken, effect) || (!effect.system.applyToSelf && (sourceToken === targetToken))) continue;
+        if (!auraShouldApply(effect, targetToken)) continue
         newBestApplyMap[targetToken.actor.uuid] ??= [];
         newBestApplyMap[targetToken.actor.uuid].push(effect.uuid);
         break;
@@ -188,7 +187,8 @@ async function updateAllAuraRegions(token) {
     const sourceEffect = fromUuidSync(region.getFlag("auraeffects", "origin"));
     for (const currToken of region.tokens) {
       if (!currToken.actor) continue;
-      const currAppliedEffect = currToken.actor.effects.find(e => e.origin === sourceEffect.uuid);
+      // TODO: For version 3.0, simplify this with the assumption that the old boolean-style fromAura flags are gone
+      const currAppliedEffect = currToken.actor.effects.find(e => [e.getFlag("auraeffects", "fromAura"), e.origin].includes(sourceEffect.uuid));
       if (currAppliedEffect) {
         if (!auraShouldApply(sourceEffect, currToken)) toRemove.push(currAppliedEffect);
       } else {
@@ -212,7 +212,8 @@ async function refreshConditionalAuras(token) {
   for (const region of getAuraRegions(token)) {
     const sourceEffect = fromUuidSync(region.getFlag("auraeffects", "origin"));
     if (!sourceEffect?.system.script.length) continue;
-    const existingEffect = token.actor.effects.find(e => e.origin === sourceEffect.uuid);
+    // TODO: For version 3.0, simplify this with the assumption that the old boolean-style fromAura flags are gone
+    const existingEffect = token.actor.effects.find(e => [e.getFlag("auraeffects", "fromAura"), e.origin].includes(sourceEffect.uuid));
     const shouldApply = auraShouldApply(sourceEffect, token);
     if (existingEffect && !shouldApply) toRemove.push(existingEffect);
     else if (!existingEffect && shouldApply) toAdd.push(sourceEffect.uuid);

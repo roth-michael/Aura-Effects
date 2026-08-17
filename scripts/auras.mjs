@@ -39,8 +39,7 @@ async function createToken(token, options, userId) {
   // Exit early for non-initiators, or if no active GM
   if (game.user.id !== userId) return;
   if (!token.actor) return;
-  const activeGM = checkActiveGM();
-  if (!activeGM) return;
+  if (!checkActiveGM()) return;
   await updateAllAuraRegions(token);
 }
 
@@ -59,13 +58,42 @@ async function updateToken(token, updates, options, userId) {
   const activeGM = checkActiveGM();
   if (!activeGM) return;
   await updateAllAuraRegions(token);
+  await refreshConditionalAuras(token);
+
+  // Disposition change
+  if ("disposition" in updates) {
+    const appliedAuras = token.actor.effects.filter(e => e.getFlag("auraeffects", "fromAura"));
+    const [toApply, toRemove] = getAuraRegions(token)
+      .map(r => fromUuidSync(r.getFlag("auraeffects", "origin")))
+      .reduce((acc, effect) => {
+        if (!effect) return acc;
+        if (auraShouldApply(effect, token)) acc[0].push(effect.uuid);
+        else {
+          // TODO: For version 3.0, simplify this with the assumption that the old boolean-style fromAura flags are gone
+          const appliedAura = appliedAuras.find(e => {
+            const fromAura = e.getFlag("auraeffects", "fromAura");
+            if (!fromAura) return false;
+            return [fromAura, e.origin].includes(effect.uuid);
+          });
+          if (appliedAura) acc[1].push(appliedAura);
+        }
+        return acc;
+      }, [[], []]);
+    if (toApply.length) await activeGM.query("auraeffects.applyAuraEffects", {[token.actor.uuid]: toApply});
+    await removeAndReplaceAuras(toRemove, token.parent);
+  }
   
   // Regions change
   const priorRegionIds = options._priorRegions?.[token.id];
   if (!priorRegionIds) return;
   const oldRegions = priorRegionIds.map(i => token.parent.regions.get(i)).filter(r => r && !token.regions.has(r));
   const originsToRemove = new Set(oldRegions.map(r => r.getFlag("auraeffects", "origin")))
-  const toRemove = token.actor.effects.contents.filter(e => e.getFlag("auraeffects", "fromAura") && originsToRemove.has(e.origin));
+  // TODO: For version 3.0, simplify this with the assumption that the old boolean-style fromAura flags are gone
+  const toRemove = token.actor.effects.contents.filter(e => {
+    const fromAura = e.getFlag("auraeffects", "fromAura");
+    if (!fromAura) return false;
+    return originsToRemove.has((fromAura === true) ? e.origin : fromAura);
+  });
   await removeAndReplaceAuras(toRemove, token.parent);
   const toApply = getAuraRegions(token)
     .filter(r => !priorRegionIds.includes(r.id))
@@ -85,13 +113,12 @@ async function updateToken(token, updates, options, userId) {
 async function addRemoveEffect(effect, options, userId) {
   if (!effect.modifiesActor || !(effect.target instanceof Actor)) return;
   // Avoid calling this every time we add/remove an aura effect. Might miss some weird conditionals, but saves time
-  if (foundry.utils.getProperty(effect, 'flags.auraeffects.fromAura')) return;
+  if (foundry.utils.hasProperty(effect, 'flags.auraeffects.fromAura')) return;
   // Exit early for non-initiators or if no active GM
   if (game.user.id !== userId) return;
   const [token] = effect.target.getActiveTokens(false, true);
   if (!token) return;
-  const activeGM = checkActiveGM();
-  if (!activeGM) return;
+  if (!checkActiveGM()) return;
   await updateAllAuraRegions(token);
   await refreshConditionalAuras(token);
 }
@@ -110,8 +137,7 @@ async function updateActiveEffect(effect, updates, options, userId) {
    const actor = (effect.parent instanceof Actor) ? effect.parent : effect.parent?.parent;
   const [token] = actor?.getActiveTokens(false, true) ?? [];
   if (!token) return;
-  const activeGM = checkActiveGM();
-  if (!activeGM) return;
+  if (!checkActiveGM()) return;
   await updateAllAuraRegions(token);
   await refreshConditionalAuras(token);
 }
@@ -128,9 +154,9 @@ async function deleteRegion(region, options, userId) {
   const originUuid = region.getFlag("auraeffects", "origin");
   if (!originUuid) return;
   if (!region.parent) return;
-  const activeGM = checkActiveGM();
-  if (!activeGM) return;
-  const toRemove = Array.from(region.tokens).map(t => t.actor?.effects.find(e => e.origin === originUuid)).filter(Boolean);
+  if (!checkActiveGM()) return;
+  // TODO: For version 3.0, simplify this with the assumption that the old boolean-style fromAura flags are gone
+  const toRemove = Array.from(region.tokens).map(t => t.actor?.effects.find(e => [e.getFlag("auraeffects", "fromAura"), e.origin].includes(originUuid))).filter(Boolean);
   await removeAndReplaceAuras(toRemove, region.parent);
 }
 
@@ -145,9 +171,60 @@ async function updateActor(actor, updates, options, userId) {
   if (game.user.id !== userId) return;
   const [token] = actor.getActiveTokens(false, true) ?? [];
   if (!token) return;
-  const activeGM = checkActiveGM();
-  if (!activeGM) return;
+  if (!checkActiveGM()) return;
   await refreshConditionalAuras(token);
+}
+
+/**
+ * On combatant creation/deletion, refresh all auras to account for combat-only auras, and conditional auras just in case
+ * @param {Combatant} combatant The combatant being created or deleted
+ * @param {Object} options      Additional options
+ * @param {String} userId       The initiating User's ID
+ */
+async function addRemoveCombatant(combatant, options, userId) {
+  if (game.user.id !== userId) return;
+  if (!combatant.token) return;
+  if (!checkActiveGM()) return;
+  await updateAllAuraRegions(combatant.token);
+  await refreshConditionalAuras(combatant.token);
+}
+
+/**
+ * On combat deletion, refresh auras & update conditionals for all combatants who were part of the combat
+ * @param {Combat} combat   The combat being deleted
+ * @param {Object} options  Additional options
+ * @param {String} userId   The initiating User's ID
+ */
+async function deleteCombat(combat, options, userId) {
+  if (game.user.id !== userId) return;
+  if (!checkActiveGM()) return;
+  for (const combatant of combat.combatants) {
+    if (!combatant.token) continue;
+    await updateAllAuraRegions(combatant.token);
+  }
+
+  // Split this into its own loop to avoid refreshing auras which may be removed in the above loop
+  for (const combatant of combat.combatants) {
+    if (!combatant.token) continue;
+    await refreshConditionalAuras(combatant.token);
+  }
+}
+
+/**
+ * Provided the arguments for the updateCombat hook, refresh any conditional-having effects for combatants if round/turn changed
+ * @param {Actor} combat    The actor being updated
+ * @param {Object} updates  The updates
+ * @param {Object} options  Additional options
+ * @param {String} userId   The initiating User's ID
+ */
+async function updateCombat(combat, updates, options, userId) {
+  if (game.user.id !== userId) return;
+  if (!("round" in updates) && !("turn" in updates)) return;
+  if (!checkActiveGM()) return;
+  for (const combatant of combat.combatants) {
+    if (!combatant.token) continue;
+    await refreshConditionalAuras(combatant.token);
+  }
 }
 
 /**
@@ -197,6 +274,10 @@ function registerHooks() {
   Hooks.on("updateActiveEffect", updateActiveEffect);
   Hooks.on("deleteRegion", deleteRegion);
   Hooks.on("updateActor", updateActor);
+  Hooks.on("createCombatant", addRemoveCombatant);
+  Hooks.on("deleteCombatant", addRemoveCombatant);
+  Hooks.on("deleteCombat", deleteCombat);
+  Hooks.on("updateCombat", updateCombat);
 
   // UI hooks
   Hooks.on("renderActiveEffectConfig", injectAuraButton);

@@ -32,7 +32,8 @@ async function applyAuraEffects(actorToEffectsMap) {
       const batchDelete = [];
       const allEffects = actor.effects;
       for (const uuid of effectUuids) {
-        if (allEffects.some(e => e.origin === uuid)) continue;
+        // TODO: For version 3.0, simplify this with the assumption that the old boolean-style fromAura flags are gone
+        if (allEffects.some(e => [e.getFlag("auraeffects", "fromAura"), e.origin].includes(uuid))) continue;
         const effect = fromUuidSync(uuid);
         if (!effect) continue;
         const effectData = foundry.utils.mergeObject(effect.toObject(), {
@@ -40,7 +41,7 @@ async function applyAuraEffects(actorToEffectsMap) {
           origin: uuid,
           type: effect.getFlag("auraeffects", "originalType") ?? "base",
           transfer: false,
-          "flags.auraeffects.fromAura": true
+          "flags.auraeffects.fromAura": uuid
         });
         if (!effect.system.canStack) {
           const bestValue = new Roll(effect.system.bestFormula.trim() || "0", effect.parent?.getRollData?.()).evaluateSync().total;

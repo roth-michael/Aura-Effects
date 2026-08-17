@@ -19,7 +19,8 @@ function onTransformation(actor) {
   for (const sourceEffect of activeSourceEffects) {
     for (const token of token.parent.tokens) {
       if (token === sourceToken) continue;
-      const badEffect = token.actor?.effects.find(e => e.origin === sourceEffect.uuid);
+      // TODO: For version 3.0, simplify this with the assumption that the old boolean-style fromAura flags are gone
+      const badEffect = token.actor?.effects.find(e => [e.getFlag("auraeffects", "fromAura"), e.origin].includes(sourceEffect.uuid));
       if (badEffect) toDelete.push(badEffect);
     }
   }
