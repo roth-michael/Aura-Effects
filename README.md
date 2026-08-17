@@ -1,3 +1,6 @@
+# Note:
+This module has moved to https://git.gay/roth-michael/Aura-Effects - any issues or pull requests should be opened there.
+
 # Aura Effects
 ## Summary
 A module that lets Active Effects be configured as "Auras," automatically applying to tokens within a configured range, and optionally showing a visualization of the aura.
